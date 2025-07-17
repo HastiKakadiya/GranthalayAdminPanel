@@ -1,0 +1,624 @@
+<!-- finallllllllllll -->
+
+<style>
+    select[name="subcategory_id"] {
+        max-height: 150px;
+        overflow-y: auto;
+    }
+
+    select[name="category_id"] {
+        max-height: 150px;
+        overflow-y: auto;
+    }
+
+    /* Base color variables for light and dark themes */
+    :root {
+        --bg-color: #ffffff;
+        --text-color: #1a1a1a;
+        --card-bg: #f9f9f9;
+        --card-border: #e0e0e0;
+        --primary-color: #4a90e2;
+        --secondary-color: #6c757d;
+        --success-color: #28a745;
+        --danger-color: #dc3545;
+        --font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        --transition: 0.3s ease;
+    }
+
+    [data-theme="dark"] {
+        --bg-color: #121212;
+        --text-color: #f5f5f5;
+        --card-bg: #1e1e1e;
+        --card-border: #2c2c2c;
+        --primary-color: #4a90e2;
+        --secondary-color: #999999;
+        --success-color: #28d37c;
+        --danger-color: #ff4c4c;
+    }
+
+    body {
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        font-family: var(--font-family);
+        margin: 0;
+        padding: 0;
+        transition: var(--transition);
+    }
+
+    /* Utility classes */
+    .container {
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 1rem;
+    }
+
+    .card {
+        background-color: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        transition: var(--transition);
+    }
+
+    .card:hover {
+        box-shadow: 0 6px 14px rgba(0, 0, 0, 0.1);
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        color: var(--text-color);
+        margin: 0 0 0.5rem 0;
+    }
+
+    a {
+        color: var(--primary-color);
+        text-decoration: none;
+        transition: var(--transition);
+    }
+
+    a:hover {
+        text-decoration: underline;
+    }
+
+    /* Buttons */
+    .button {
+        background-color: var(--primary-color);
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        padding: 0.6rem 1.2rem;
+        cursor: pointer;
+        font-weight: 500;
+        transition: var(--transition);
+        background-color: #0a7697;
+        width: 200px;
+        margin-top: 20px;
+    }
+
+    .button:hover {
+        background-color: darken(var(--primary-color), 10%);
+    }
+
+    /* Table styles */
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+    }
+
+    th,
+    td {
+        padding: 0.8rem;
+        text-align: left;
+        border-bottom: 1px solid var(--card-border);
+        color: var(--text-color);
+    }
+
+    th {
+        background-color: var(--card-bg);
+        font-weight: bold;
+    }
+
+    /* Form elements */
+    input,
+    select,
+    textarea {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 6px;
+        padding: 0.5rem;
+        color: var(--text-color);
+        transition: var(--transition);
+        width: 100%;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+        border-color: var(--primary-color);
+        outline: none;
+    }
+
+    /* Toggle Theme Switch (if needed) */
+    .theme-toggle {
+        position: fixed;
+        top: 1rem;
+        right: 1rem;
+        background-color: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 999px;
+        padding: 0.5rem 1rem;
+        cursor: pointer;
+        font-weight: 500;
+    }
+
+    label {
+        margin-bottom: 10px;
+        margin-top: 10px;
+    }
+
+    .preview-img {
+        border-radius: 8px;
+        margin-top: 8px;
+        border: 1px solid var(--card-border);
+        max-height: 200px;
+        object-fit: cover;
+    }
+
+    .headings {
+        margin-bottom: 20px;
+        margin-top: 20px;
+        font-size: 17px;
+        font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+        border-bottom: #ffffff;
+        border-width: 1;
+        background-color: #31729e;
+        border-radius: 10px;
+        padding: 10px;
+    }
+
+    label {
+        margin-bottom: 10px;
+        margin-top: 10px;
+    }
+</style>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+<style>
+    a.btn:hover {
+        transform: scale(1.03);
+        transition: all 0.3s ease-in-out;
+    }
+</style>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+<% if (typeof success !=='undefined' ) { %>
+
+    <script>
+        setTimeout(() => {
+            const alert = document.getElementById('successAlert');
+            if (alert) {
+                alert.classList.remove('animate__fadeInDown');
+                alert.classList.add('animate__fadeOutUp');
+                setTimeout(() => alert.remove(), 1000);
+            }
+        }, 3000);
+        // auto-hide after 3 seconds
+        setTimeout(() => {
+            const alert = document.getElementById('failureAlert');
+            if (alert) {
+                alert.classList.remove('show');
+                alert.classList.add('hide');
+            }
+        }, 3000);
+    </script>
+    <% } %>
+
+
+        <%- include('layouts/sidebar'); %>
+            <%- include('layouts/header'); %>
+
+                <section class="content-main">
+
+                    <div class="container">
+                        <div class="d-flex justify-content-between align-items-center my-3">
+                            <h2 class="text mb-0">🛒 Create New Product</h2>
+
+                            <a href="/products"
+                                class="btn btn-outline-primary d-flex align-items-center gap-2 px-4 py-2 rounded-pill shadow-sm"
+                                style="max-width: fit-content; font-weight: 500; text-decoration: none;"
+                                onmouseover="this.style.textDecoration='none'"
+                                onmouseout="this.style.textDecoration='none'">
+                                <i class="bi bi-house-door-fill" style="font-size: 1.2rem;"></i>
+                                Back to Product List
+                            </a>
+                        </div>
+
+
+                        <% if (message) { %>
+                            <div class="alert alert-danger">
+                                <%= message %>
+                            </div>
+                            <% } %>
+
+
+                                <form action="/products-create" method="POST" enctype="multipart/form-data"
+                                    class="card">
+                                    <!-- === Basic Info === -->
+                                    <fieldset>
+                                        <legend class="headings">Basic Information</legend>
+                                        <div class="mb-3">
+                                            <label>Title :</label>
+                                            <input type="text" name="title" class="form-control border" required />
+                                        </div>
+                                        <div class="row">
+
+                                            <div class="col-md-6 mb-3">
+                                                <label>Slug :</label>
+                                                <input type="text" name="slug" class="form-control border" required />
+                                            </div>
+
+                                            <div class="col-md-6 mb-3">
+                                                <label>SKU :</label>
+                                                <input type="text" name="sku" class="form-control border" required />
+                                            </div>
+                                        </div>
+                                    </fieldset>
+                                    <fieldset>
+                                        <legend class="headings">Pricing</legend>
+                                        <div class="row">
+
+                                            <!-- Price -->
+                                            <div class="col-md-6 mb-3">
+                                                <label>Assign Price :</label>
+                                                <input type="number" step="0.01" name="assign_price"
+                                                    class="form-control border" required />
+                                            </div>
+
+                                            <div class="col-md-6 mb-3">
+                                                <label>Unassign Price :</label>
+                                                <input type="number" step="0.01" name="unassign_price"
+                                                    class="form-control border" required />
+                                            </div>
+                                        </div>
+                                    </fieldset>
+                                    <fieldset>
+                                        <legend class="headings">Category Details</legend>
+
+
+                                        <!-- Category -->
+                                        <div class="mb-3">
+                                            <label for="parent_categories">Parent Category :<span
+                                                    class="text-danger">*</span></label>
+                                            <select name="categories" id="parentCategory" class="form-select border"
+                                                required>
+                                                <option value="">Select Parent Category</option>
+                                                <% parentCategories.forEach(cat=> { %>
+                                                    <option value="<%= cat._id %>">
+                                                        <%= cat.name %>
+                                                    </option>
+                                                    <% }) %>
+                                            </select>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="sub_categories">Subcategory :</label>
+                                            <select name="sub_categories" id="subCategory" class="form-select">
+                                                <option value="">Select Subcategory</option>
+                                            </select>
+
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="child_categories">Child Categories (Optional) :</label>
+                                            <select name="child_categories" id="childCategory" class="form-select">
+                                                <option value="">Select Child Category</option>
+                                            </select>
+
+                                        </div>
+
+                                    </fieldset>
+                                    <!-- Stock -->
+                                    <fieldset>
+                                        <legend class="headings">Stock & Status</legend>
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label>Total Stock :</label>
+                                                <input type="number" name="total_stock" class="form-control" required />
+                                            </div>
+
+                                            <div class="col-md-6 mb-3">
+                                                <label>Original Languages :</label>
+                                                <input type="text" name="languages" class="form-control"
+                                                    placeholder="e.g. English, Hindi" />
+                                            </div>
+
+                                            <!-- Status -->
+                                            <div class="col-md-6 mb-3">
+                                                <label>Status :</label>
+                                                <select name="status" class="form-select">
+                                                    <option value="true">Active</option>
+                                                    <option value="false">Inactive</option>
+                                                </select>
+                                            </div>
+
+                                        </div>
+                                    </fieldset>
+
+                                    <fieldset>
+                                        <legend class="headings">Images</legend>
+                                        <div class="row">
+
+                                            <!-- Cover Image -->
+                                            <div class="col-md-6 mb-3">
+                                                <label>Cover Image :</label>
+
+                                                <input type="file" name="cover_photo" class="form-control"
+                                                    onchange="coverPhoto(event)" required />
+                                                <img id="cover_photo" class="preview-img" />
+                                            </div>
+
+                                            <!-- Other Images -->
+                                            <div class="col-md-6 mb-3">
+                                                <label>Other Images :</label>
+                                                <input type="file" name="other_photo" class="form-control" multiple
+                                                    onchange="otherPhoto(event)" />
+                                                <img id="other_photo" class="preview-img" />
+                                            </div>
+                                        </div>
+                                    </fieldset>
+                                    <fieldset>
+                                        <legend class="headings">Descriptions</legend>
+                                        <div class="row">
+                                            <!-- Descriptions -->
+                                            <div class="col-md-12 mb-3">
+                                                <label>Short Description :</label>
+                                                <textarea name="short_description" class="form-control" rows="3"
+                                                    required></textarea>
+                                            </div>
+
+                                            <div class="col-md-12 mb-3">
+                                                <label>Full Description :</label>
+                                                <textarea name="full_description" id="full_description"
+                                                    class="form-control" rows="6" required></textarea>
+                                            </div>
+                                        </div>
+                                    </fieldset>
+                                    <!-- Attributes -->
+                                    <fieldset>
+
+                                        <legend class="headings">Attributes</legend>
+
+                                        <% if (parentAttributes.length) { %>
+                                            <% parentAttributes.forEach((attr, index)=> { %>
+                                                <div class="form-check mb-2">
+                                                    <input type="checkbox" class="form-check-input parent-attr-checkbox"
+                                                        style="margin-top: 5px;" id="parentAttr<%= index %>"
+                                                        name="parent_attributes[]" value="<%= attr._id %>"
+                                                        data-child-group="childGroup<%= index %>">
+                                                    <p class="form-check-label fw-bold" for="parentAttr<%= index %>">
+                                                        <%= attr.name %>
+                                                    </p>
+                                                </div>
+
+                                                <div class="ms-4 mt-2 child-attr-group d-none"
+                                                    id="childGroup<%= index %>">
+                                                    <% childAttributes.filter(child=> String(child.parent) ===
+                                                        String(attr._id)).forEach((childAttr, childIndex) => { %>
+                                                        <div class="form-check">
+                                                            <input type="checkbox" class="form-check-input"
+                                                                name="child_attributes[]" value="<%= childAttr._id %>"
+                                                                id="childAttr<%= index %>_<%= childIndex %>">
+                                                            <p class="form-check-label"
+                                                                for="childAttr<%= index %>_<%= childIndex %>">
+                                                                <%= childAttr.name %>
+                                                            </p>
+                                                        </div>
+                                                        <% }) %>
+                                                </div>
+                                                <% }) %>
+                                                    <% } else { %>
+                                                        <p>No attributes found.</p>
+                                                        <% } %>
+
+                                    </fieldset>
+                                    <!-- Submit -->
+                                    <div class="col-md-12 mt-3 d-flex justify-content-center">
+                                        <button type="submit" class="button">Save
+                                            Product</button>
+                                    </div>
+                    </div>
+                    </form>
+                    <% if (success) { %>
+                        <div id="successAlert"
+                            class="alert alert-success alert-dismissible fade show animate__animated animate__fadeInDown"
+                            role="alert"
+                            style="z-index: 9999; position: fixed; top: 80px; right: 20px; min-width: 250px;">
+                            <%= success %>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                    aria-label="Close"></button>
+                        </div>
+                        <% } %>
+
+                            <% if (failure) { %>
+                                <div id="failureAlert"
+                                    class="alert alert-danger alert-dismissible fade show animate__animated animate__fadeInDown"
+                                    role="alert"
+                                    style="z-index: 9999; position: fixed; top: 80px; right: 20px; min-width: 250px;">
+                                    <%= failure %>
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                            aria-label="Close"></button>
+                                </div>
+                                <% } %>
+
+                                    </div>
+                </section>
+
+                <%- include('layouts/footer'); %>
+
+                    <script>
+                        setTimeout(() => {
+                            document.getElementById("message")?.remove();
+                        }, 8000);
+
+                        document.addEventListener("DOMContentLoaded", () => {
+                            document.querySelectorAll(".parent-attr").forEach(checkbox => {
+                                checkbox.addEventListener("change", () => {
+                                    const childGroup = document.getElementById("childGroup_" + checkbox.value);
+                                    if (checkbox.checked) {
+                                        childGroup.style.display = "block";
+                                    } else {
+                                        childGroup.style.display = "none";
+                                        childGroup.querySelectorAll("input[type=checkbox]").forEach(c => c.checked = false);
+                                    }
+                                });
+                            });
+
+                            document.getElementById("categories")?.addEventListener("change", function () {
+                                const categoryId = this.value;
+
+                                if (!categoryId) return; // Exit if nothing is selected
+
+                                fetch("/products-create/parent-find", {
+                                    method: "POST",
+                                    headers: { "Content-Type": "application/json" },
+                                    body: JSON.stringify({ id: categoryId, message: "sub-find" }) // include `message`
+                                })
+                                    .then(res => res.json())
+                                    .then(data => {
+                                        const subCat = document.getElementById("sub_categories");
+                                        subCat.innerHTML = "<option value=''>Select Subcategory</option>";
+                                        data.forEach(item => {
+                                            subCat.innerHTML += `<option value="${item._id}">${item.name}</option>`;
+                                        });
+                                    })
+                                    .catch(err => {
+                                        console.error("Subcategory fetch failed:", err);
+                                    });
+                            });
+
+                            document.getElementById("child_categories")?.addEventListener("change", function () {
+                                fetch("/products-create/child-find", {
+                                    method: "POST",
+                                    headers: { "Content-Type": "application/json" },
+                                    body: JSON.stringify({ id: this.value })
+                                }).then(res => res.json()).then(data => {
+                                    const childCat = document.getElementById("child_categories");
+                                    childCat.innerHTML = "<option value=''>Select Child</option>";
+                                    data.forEach(item => {
+                                        childCat.innerHTML += `<option value="${item._id}">${item.name}</option>`;
+                                    });
+                                });
+                            });
+
+                            if (document.getElementById('full_description')) {
+                                CKEDITOR.replace('full_description');
+                            }
+                        });
+
+                        function coverPhoto(event) {
+                            let output = document.getElementById("cover_photo");
+                            output.src = URL.createObjectURL(event.target.files[0]);
+                            output.onload = function () {
+                                URL.revokeObjectURL(output.src);
+                            };
+                        }
+
+                        function otherPhoto(event) {
+                            let output = document.getElementById("other_photo");
+                            output.src = URL.createObjectURL(event.target.files[0]);
+                            output.onload = function () {
+                                URL.revokeObjectURL(output.src);
+                            };
+                        }
+                    </script>
+
+                    <script>
+                        document.querySelectorAll('.parent-attr-checkbox').forEach(checkbox => {
+                            const targetId = checkbox.dataset.childGroup;
+                            const childGroup = document.getElementById(targetId);
+
+                            // On load
+                            if (checkbox.checked) {
+                                childGroup.classList.remove('d-none');
+                            }
+
+                            // On change
+                            checkbox.addEventListener('change', () => {
+                                if (checkbox.checked) {
+                                    childGroup.classList.remove('d-none');
+                                } else {
+                                    childGroup.classList.add('d-none');
+                                    childGroup.querySelectorAll('input[type="checkbox"]').forEach(child => {
+                                        child.checked = false;
+                                    });
+                                }
+                            });
+                        });
+                    </script>
+                    <script>
+                        document.getElementById('parentCategory').addEventListener('change', function () {
+                            const parentId = this.value;
+                            fetch('/products-create/sub-find', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ message: 'sub-find', id: parentId })
+                            })
+                                .then(res => res.json())
+                                .then(data => {
+                                    let subOptions = '<option value="">Select Subcategory</option>';
+                                    data.forEach(cat => {
+                                        subOptions += `<option value="${cat._id}">${cat.name}</option>`;
+                                    });
+                                    document.getElementById('subCategory').innerHTML = subOptions;
+                                    document.getElementById('childCategory').innerHTML = '<option value="">Select Child Category</option>';
+                                });
+                        });
+
+                        document.getElementById('subCategory').addEventListener('change', function () {
+                            const subId = this.value;
+                            fetch('/products-create/child-find', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ message: 'child-find', id: subId })
+                            })
+                                .then(res => res.json())
+                                .then(data => {
+                                    let childOptions = '<option value="">Select Child Category</option>';
+                                    data.forEach(cat => {
+                                        childOptions += `<option value="${cat._id}">${cat.name}</option>`;
+                                    });
+                                    document.getElementById('childCategory').innerHTML = childOptions;
+                                });
+                        });
+                    </script>
+
+                    <script>
+                        const subcategories = <% - JSON.stringify(childCategories) %>; // all child categories
+                        const subcategorySelect = document.querySelector('select[name="subcategory_id"]');
+                        const categorySelect = document.querySelector('select[name="category_id"]');
+
+                        categorySelect.addEventListener('change', function () {
+                            const selectedCategoryId = this.value;
+
+                            // Clear old options
+                            subcategorySelect.innerHTML = '<option value="">Select Subcategory</option>';
+
+                            // Filter and append new options
+                            const filteredSubcategories = subcategories.filter(sub => sub.parent === selectedCategoryId);
+
+                            filteredSubcategories.forEach(sub => {
+                                const option = document.createElement('option');
+                                option.value = sub._id;
+                                option.textContent = sub.name;
+                                subcategorySelect.appendChild(option);
+                            });
+                        });
+                    </script>

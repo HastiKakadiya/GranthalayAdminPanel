@@ -1,0 +1,397 @@
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+
+<style>
+  .profile-img-wrapper {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1rem;
+  }
+
+  .profile-img-wrapper img {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 50%;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .edit-icon-btn {
+    position: absolute;
+    bottom: 0;
+    right: calc(50% - 75px);
+    /* Adjusts icon to bottom-right of image */
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    padding: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform: translate(50%, 50%);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  }
+
+  .edit-icon-btn:hover {
+    background-color: #0056b3;
+  }
+
+  #image {
+    display: none;
+  }
+</style>
+
+<%- include('layouts/sidebar'); %>
+  <%- include('layouts/header'); %>
+    <section class="content-main" style="padding:30px; padding-left: 200px;">
+
+      <!-- <main class="main-wrap" style="width: 50%; margin: 40px;"> -->
+      <main class="main-wrap" style="width: 45%; margin-top: 30px;;">
+        <!-- <main class="main-wrap" style="width: 50%; margin: 20px;"> -->
+        <div class="container mt-5">
+          <div class="card shadow p-4 border-0 rounded-4">
+
+            <h2 class="mb-4 text-center" style="font-family: Arial, Helvetica, sans-serif; margin-top: 20px;">Edit
+              Profile</h2>
+
+            <% if (success) { %>
+              <div class="alert alert-success position-relative" id="successMessage">
+                <%= success %>
+                  <button type="button" class="btn-close position-absolute end-0 top-0 m-2"
+                    id="closeSuccessMessage"></button>
+              </div>
+              <% } else if (error) { %>
+                <div class="alert alert-danger">
+                  <%= error %>
+                </div>
+                <% } %>
+                  <h4
+                    style="margin-top: 20px;margin-left: 20px;margin-bottom: 10px; font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;">
+                    Personal Details</h4>
+
+                  <!-- ✅ Profile Overview -->
+                  <div class="d-flex align-items-center gap-4 mb-4"
+                    style=" background-color: #0056b3;padding: 20px;border-radius: 10px;">
+
+                    <img src="/assets/imgs/people/admin-profile.jpg" alt="Profile Image" width="100" height="100"
+                      class="rounded-circle shadow-sm object-fit-cover">
+                    <div>
+                      <p style="color: white;"><strong>Username:</strong>
+                        <%= user.username %>
+                      </p>
+                      <p style="color: white;"><strong>Email:</strong>
+                        <%= user.email %>
+                      </p>
+                    </div>
+                  </div>
+
+                  <!-- ✅ Image Upload -->
+                  <!-- <form action="/profile/edit" method="POST" enctype="multipart/form-data" autocomplete="off" class="mb-4">
+      <div class="mb-3">
+        <label for="image" class="form-label">Update Profile Image</label>
+        <input type="file" class="form-control shadow-sm" name="image" id="image" accept="image/*">
+      </div>
+      <button type="submit" class="btn btn-primary w-100 shadow-sm">Update Image</button>
+    </form> -->
+
+
+                  <form action="/profile/edit" method="POST" enctype="multipart/form-data" autocomplete="off"
+                    class="mb-4">
+                    <div class="profile-img-wrapper">
+                      <img src="/assets/imgs/people/admin-profile.jpg" alt="Profile Image" width="100" height="100"
+                        class="rounded-circle shadow-sm object-fit-cover">
+
+                      <!-- Pencil Icon Button -->
+                      <button type="button" class="edit-icon-btn" onclick="document.getElementById('image').click()">
+                        <i class="fas fa-pencil-alt"></i>
+                      </button>
+                    </div>
+
+                    <!-- Hidden file input -->
+                    <input type="file" name="image" id="image" accept="image/*" onchange="this.form.submit()">
+                  </form>
+
+
+                  <!-- ✅ Animated Toggle Buttons -->
+                  <div class="d-flex justify-content-between mb-3">
+                    <button class="btn btn-outline-primary w-48 animated-btn" onclick="toggleForm('usernameForm')">Edit
+                      Username</button>
+                    <button class="btn btn-outline-warning w-48 animated-btn"
+                      onclick="toggleForm('passwordForm')">Change Password</button>
+                  </div>
+
+                  <!-- 🔄 Username Edit Form -->
+                  <form action="/profile/edit" method="POST" id="usernameForm" style="display: none;" autocomplete="off"
+                    class="form-slide mb-3">
+                    <div class="mb-3">
+                      <label for="username" class="form-label">New Username</label>
+                      <input type="text" class="form-control shadow-sm" name="username" value="<%= user.username %>"
+                        required>
+                    </div>
+                    <button type="submit" class="btn w-100 shadow-sm"
+                      style="background-color: rgb(52, 104, 184); color: white;">Update Username</button>
+                  </form>
+
+                  <!-- 🔄 Password Change Form -->
+                  <form action="/profile/edit" method="POST" id="passwordForm" style="display: none;" autocomplete="off"
+                    class="form-slide">
+                    <input type="hidden" name="username" value="<%= user.username %>">
+
+                    <!-- Old Password Field -->
+                    <div class="mb-3">
+                      <label for="oldPassword" class="form-label">Old Password</label>
+                      <div class="password-container">
+                        <input type="password" class="form-control shadow-sm" name="oldPassword" id="oldPassword2"
+                          required readonly onfocus="this.removeAttribute('readonly');">
+                        <span id="toggleOldPassword" class="toggle-icon">👁️</span>
+                      </div>
+                    </div>
+
+                    <!-- New Password Field -->
+                    <div class="mb-3">
+                      <label for="password" class="form-label">New Password</label>
+                      <div class="password-container">
+                        <input type="password" class="form-control shadow-sm" name="password" id="newPassword" required>
+                        <span id="toggleNewPassword" class="toggle-icon">👁️</span>
+                      </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-warning w-100 shadow-sm">Change Password</button>
+                  </form>
+          </div>
+        </div>
+        <!-- Add a Modal for Zooming the Profile Image -->
+        <div class="modal" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="imageModalLabel">Profile Image</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <img id="modalImage" src="" alt="Profile Image" class="img-fluid">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <style>
+          .profile-img-wrapper {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            margin-bottom: 1rem;
+          }
+
+          .profile-img-wrapper img {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 50%;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            /* Make it clear the image is clickable */
+          }
+
+          .edit-icon-btn {
+            position: absolute;
+            bottom: 0;
+            right: calc(50% - 75px);
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            padding: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transform: translate(50%, 50%);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+          }
+
+          .edit-icon-btn:hover {
+            background-color: #0056b3;
+          }
+
+          .modal-body img {
+            max-width: 100%;
+            max-height: 80vh;
+            object-fit: contain;
+          }
+        </style>
+
+      </main>
+    </section>
+
+    <!-- ✅ Scripts -->
+    <style>
+      .password-container {
+        position: relative;
+        width: 100%;
+      }
+
+      .password-field {
+        width: 100%;
+        padding: 10px;
+        font-size: 16px;
+      }
+
+      .toggle-icon {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+      }
+    </style>
+    <script>
+      // Toggle Old Password Visibility
+      const toggleOldPassword = document.getElementById("toggleOldPassword");
+      const oldPasswordField = document.getElementById("oldPassword2");
+
+      toggleOldPassword.addEventListener("click", function () {
+        // Toggle password visibility
+        const type = oldPasswordField.type === "password" ? "text" : "password";
+        oldPasswordField.type = type;
+
+        // Change eye icon
+        toggleOldPassword.textContent = type === "password" ? "👁️" : "🙈"; // Open or closed eye icon
+      });
+
+      // Toggle New Password Visibility
+      const toggleNewPassword = document.getElementById("toggleNewPassword");
+      const newPasswordField = document.getElementById("newPassword");
+
+      toggleNewPassword.addEventListener("click", function () {
+        // Toggle password visibility
+        const type = newPasswordField.type === "password" ? "text" : "password";
+        newPasswordField.type = type;
+
+        // Change eye icon
+        toggleNewPassword.textContent = type === "password" ? "👁️" : "🙈"; // Open or closed eye icon
+      });
+    </script>
+    <script>
+      const togglePassword = document.getElementById("togglePassword");
+      const passwordField = document.getElementById("password");
+
+      togglePassword.addEventListener("click", function () {
+        // Toggle password visibility
+        const type = passwordField.type === "password" ? "text" : "password";
+        passwordField.type = type;
+
+        // Change eye icon (for example)
+        togglePassword.textContent = type === "password" ? "👁️" : "🙈"; // Open or closed eye icon
+      });
+    </script>
+
+    <script>
+      function toggleForm(id) {
+        const el = document.getElementById(id);
+        if (el.style.display === "none" || el.style.display === "") {
+          el.style.display = "block";
+          el.classList.add("fade-in");
+        } else {
+          el.classList.remove("fade-in");
+          el.style.display = "none";
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        const oldPassField = document.getElementById("oldPassword2");
+        if (oldPassField) {
+          oldPassField.setAttribute("readonly", true);
+          oldPassField.setAttribute("autocomplete", "off");
+          oldPassField.onfocus = function () {
+            this.removeAttribute("readonly");
+            this.setAttribute("autocomplete", "new-password");
+          };
+        }
+
+        const successMessage = document.getElementById("successMessage");
+        const closeButton = document.getElementById("closeSuccessMessage");
+
+        if (successMessage) {
+          setTimeout(() => successMessage.style.display = "none", 3000);
+        }
+
+        if (closeButton) {
+          closeButton.addEventListener("click", () => {
+            successMessage.style.display = "none";
+          });
+        }
+      });
+
+
+      document.addEventListener("DOMContentLoaded", function () {
+        // Image click event to open the modal
+        const profileImage = document.querySelector(".profile-img-wrapper img");
+        const modal = new bootstrap.Modal(document.getElementById('imageModal'));
+        const modalImage = document.getElementById("modalImage");
+
+        profileImage.addEventListener("click", function () {
+          // Set the source of the image in the modal to the clicked image's source
+          modalImage.src = profileImage.src;
+          modal.show();
+        });
+      });
+
+    </script>
+
+    <!-- ✅ Styling -->
+    <style>
+      .animated-btn {
+        transition: all 0.3s ease;
+      }
+
+      .animated-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+      }
+
+      .form-slide {
+        animation: slideDown 0.3s ease-in-out;
+      }
+
+      .fade-in {
+        animation: fadeIn 0.5s ease-in-out;
+      }
+
+      @keyframes slideDown {
+        from {
+          opacity: 0;
+          transform: translateY(-10px);
+        }
+
+        to {
+          opacity: 1;
+          transform: translateY(0px);
+        }
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          scale: 0.95;
+        }
+
+        to {
+          opacity: 1;
+          scale: 1;
+        }
+      }
+
+      .w-48 {
+        width: 48%;
+      }
+
+      .object-fit-cover {
+        object-fit: cover;
+      }
+    </style>
+
+    <%- include('layouts/footer'); %>

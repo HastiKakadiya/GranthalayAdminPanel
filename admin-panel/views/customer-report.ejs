@@ -1,0 +1,419 @@
+<%- include('layouts/sidebar'); %>
+    <%- include('layouts/header'); %>
+        <style>
+            /* Default state of the date picker icon */
+            input[type="date"]::-webkit-calendar-picker-indicator {
+                filter: invert(0) sepia(0) saturate(1) hue-rotate(0deg);
+                transition: filter 0.3s ease;
+                cursor: pointer;
+            }
+
+            /* Change the icon color to blue on hover */
+            input[type="date"]:hover::-webkit-calendar-picker-indicator,
+            input[type="date"]:focus::-webkit-calendar-picker-indicator {
+                filter: invert(32%) sepia(91%) saturate(2151%) hue-rotate(201deg) brightness(100%) contrast(97%);
+            }
+        </style>
+        <section class="content-main">
+            <div class="content-header">
+                <div>
+                    <h2 class="content-title card-title">Customer Report Analysis</h2>
+                </div>
+                <!-- <form action="/customer-report/download-pdf" method="get">
+                    
+                    <button type="submit" class="btn btn-danger">Download as PDF</button>
+                </form> -->
+
+                <a href="/customer-report?exportType=excel" class="btn btn-success">Download Excel</a>
+
+
+            </div>
+
+            <!-- Card for Summary Statistics (Outer Border) -->
+            <div class="card mb-4 outer-border">
+                <div class="card-body">
+                    <div class="row">
+                        <!-- Total Customers -->
+                        <div class="col-md-4">
+                            <div class="card mb-4 outer-border" style="background-color: orange;">
+                                <div class="card-body">
+                                    <h4>Total Customers in Database</h4>
+                                    <p class="lead">
+                                        <%= totalCustomers %>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card mb-4 bg-primary outer-border">
+                                <div class="card-body">
+                                    <h4>Total Customers Found</h4>
+                                    <p class="lead">
+                                        <%= totalCustomersFound %>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- New Customers Last Month -->
+                        <div class="col-md-4">
+                            <div class="card mb-4 bg-success outer-border">
+                                <div class="card-body">
+                                    <h4>New Customers (Last Month)</h4>
+                                    <p class="lead">
+                                        <%= newCustomersLastMonth %>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search and Filter Form -->
+            <form action="/customer-report" method="get" id="filterForm">
+                <div class="row mb-4 d-flex align-items-center">
+                    <table>
+                        <tr>
+                            <td class="col-md-3">
+                                <!-- Search Input -->
+                                <input type="text" name="search" class="form-control border" style="width: 100%;"
+                                    placeholder="Search by username, full name, email or phone" value="<%= search %>">
+                            </td>
+                            <td class="col-md-1">
+                                <!-- Search Button (with centered text) -->
+                                <div>
+                                    <button type="submit" style="margin-left: 10px;"
+                                        class="btn btn-primary search-button w-100 d-flex justify-content-center align-items-center">Search</button>
+                                </div>
+                            </td>
+                            <!-- <td class="col-md-1"> -->
+                            <!-- Date Range Filter -->
+                            <!-- <div>
+                            <input type="date" name="startDate" class="form-control calendar-icon" value="<%= startDate %>">
+                        </div>
+                    </td>
+                    <td class="col-md-1">
+                        <div>
+                            <input type="date" name="endDate" class="form-control calendar-icon" value="<%= endDate %>">
+                        </div>
+                    </td> -->
+                            <td class="col-md-2">
+                                <input type="date" name="startDate" class="form-control border"
+                                    value="<%= startDate %>">
+                            </td>
+                            <td class="col-md-2">
+                                <input type="date" name="endDate" class="form-control border" value="<%= endDate %>">
+                            </td>
+                            <!-- <td class="col-md-2">
+                                <div>
+                                    <select name="year" id="yearSelect" class="form-control"
+                                        style="text-align: center;border-width: 0.01; border-color: black;">
+                                        <option value="">Select Year</option>
+                                        <% years.forEach(function(year) { %>
+                                            <option value="<%= year %>" <%=selectedYear===year ? 'selected' : '' %>
+                                                style="text-align: center;"><%= year %>
+                                            </option>
+                                            <% }); %>
+                                    </select>
+                                </div>
+                            </td> -->
+                            <td class="col-md-2">
+                                <!-- Year Selector -->
+                                <select name="year" id="yearSelect" class="form-control border"
+                                    style="text-align: center;">
+                                    <option value="">Select Year</option>
+                                    <% years.forEach(function(year) { %>
+                                        <option value="<%= year %>" <%=selectedYear===year ? 'selected' : '' %>>
+                                            <%= year %>
+                                        </option>
+                                        <% }); %>
+                                </select>
+                            </td>
+                            <td class="col-md-2">
+                                <!-- Sort Dropdown -->
+                                <div>
+                                    <select name="sortBy" class="form-control border"
+                                        style="text-align: center;">
+                                        <option value="" <%=!sortBy ? 'selected' : '' %>>Sort By</option>
+                                        <option value="desc" <%=sortBy==='desc' ? 'selected' : '' %>>Most Recent
+                                        </option>
+                                        <option value="asc" <%=sortBy==='asc' ? 'selected' : '' %>>Oldest First</option>
+                                        <option value="az" <%=sortBy==='az' ? 'selected' : '' %>>A-Z</option>
+                                        <option value="za" <%=sortBy==='za' ? 'selected' : '' %>>Z-A</option>
+                                    </select>
+                                </div>
+                            </td>
+                            <td class="col-md-1">
+                                <!-- Submit Button for Filters -->
+                                <div style="margin-left: 20px;" class="col-auto">
+                                    <button type="submit" class="btn btn-primary">Apply</button>
+                                </div>
+                            </td>
+                            <td class="col-md-1">
+                                <!-- Clear Filters Button -->
+                                <div class="col-auto">
+                                    <button type="button" id="clearButton" class="btn btn-danger">Clear</button>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </form>
+
+            <!-- Chart for Monthly Customer Data -->
+            <div class="card mb-4 outer-border">
+                <div class="card-body">
+                    <h4>Customer Analysis by Month - <%= selectedYear %>
+                    </h4>
+                    <canvas id="monthlyChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Customer Data Table (Outer Border) -->
+            <div class="card mb-4 outer-border">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover border">
+                            <thead class="border">
+                                <tr>
+                                    <th scope="col">No</th>
+                                    <th scope="col">Username</th>
+                                    <th scope="col">Full Name</th>
+                                    <th scope="col">Email</th>
+                                    <th scope="col">Phone</th>
+                                    <th scope="col">Created At</th>
+                                </tr>
+                            </thead>
+                            <tbody id="customerTable">
+                                <% customers.slice(0, 10).forEach((customer, index)=> { %>
+                                    <tr>
+                                        <td><b>
+                                                <%= index + 1 %>
+                                            </b></td>
+                                        <td>
+                                            <%= customer.username %>
+                                            
+                                        </td>
+                                        <td>
+                                            <%= customer.full_name %>
+                                        </td>
+                                        <td>
+                                            <%= customer.email %>
+                                        </td>
+                                        <td>
+                                            <%= customer.phone %>
+                                        </td>
+                                        <td>
+                                            <%= new Date(customer.createdAt).toLocaleDateString() %>
+                                        </td>
+                                    </tr>
+                                    <% }) %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <% if (typeof totalRecords !=="undefined" && totalRecords> 10) { %>
+                <div class="text-center">
+                    <a href="/customers" class="btn btn-primary">More...</a>
+                </div>
+                <% } %>
+
+        </section>
+
+        <%- include('layouts/footer'); %>
+
+            <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+            <script>
+                $(document).ready(function () {
+                    // Initialize the chart
+                    updateChart('<%= selectedYear %>');
+
+                    // When a year is selected, fetch data and update chart
+                    $('#yearSelect').change(function () {
+                        let selectedYear = $(this).val();
+                        if (selectedYear === "") {
+                            // If "Select Year" is chosen, update the chart without filtering by year
+                            updateChart(null); // Pass null to show the whole dataset in the chart
+                        } else {
+                            updateChart(selectedYear); // Update the chart with new data based on the selected year
+                            fetchDataForYear(selectedYear); // Fetch the customer data for the selected year
+                        }
+                    });
+
+                    // Handle search or apply filters click
+                    $('#filterForm').submit(function (e) {
+                        e.preventDefault(); // Prevent the default form submission
+
+                        var form = $(this);
+
+                        // Submit the form (refresh the data) first
+                        form[0].submit();
+                    });
+
+                    // Clear Filters Button
+                    $('#clearButton').click(function () {
+                        // Reset all form fields and reload the page with no filters
+                        $('#filterForm')[0].reset(); // Reset the form inputs
+                        $('#yearSelect').val(''); // Reset the year select field
+
+                        // Reload the page with no filters applied
+                        window.location.href = '/customer-report'; // Refresh the page with no filters applied
+                    });
+                });
+
+                // Function to update the chart based on selected year
+                function updateChart(selectedYear) {
+                    const ctx = document.getElementById('monthlyChart').getContext('2d');
+                    const chartData = <%- JSON.stringify(chartData) %>;
+                    const chartLabels = <%- JSON.stringify(chartLabels) %>;
+
+                    // If "Select Year" is chosen or no year is selected, show the whole dataset
+                    if (!selectedYear) {
+                        // Show data for all years (i.e., do not filter)
+                        const allLabels = chartLabels;
+                        const allData = chartData;
+
+                        new Chart(ctx, {
+                            type: 'line',
+                            data: {
+                                labels: allLabels,
+                                datasets: [{
+                                    label: 'Number of Customers',
+                                    data: allData,
+                                    borderColor: 'rgb(75, 192, 192)',
+                                    tension: 0.1
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                scales: {
+                                    x: {
+                                        title: {
+                                            display: true,
+                                            text: 'Months'
+                                        }
+                                    },
+                                    y: {
+                                        title: {
+                                            display: true,
+                                            text: 'Number of Customers'
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                    } else {
+                        // If a specific year is selected, filter chart data by that year
+                        const filteredLabels = chartLabels.filter((label, index) => label.includes(selectedYear));
+                        const filteredData = chartData.filter((data, index) => chartLabels[index].includes(selectedYear));
+
+                        new Chart(ctx, {
+                            type: 'line',
+                            data: {
+                                labels: filteredLabels,
+                                datasets: [{
+                                    label: 'Number of Customers',
+                                    data: filteredData,
+                                    borderColor: 'rgb(75, 192, 192)',
+                                    tension: 0.1
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                scales: {
+                                    x: {
+                                        title: {
+                                            display: true,
+                                            text: 'Months'
+                                        }
+                                    },
+                                    y: {
+                                        title: {
+                                            display: true,
+                                            text: 'Number of Customers'
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                    }
+                }
+
+                // Function to fetch the customer data based on selected year
+                function fetchDataForYear(year) {
+                    $.ajax({
+                        url: '/customer-report', // Change from '/report' to '/customer-report'
+                        method: 'GET',
+                        data: {
+                            year: year,
+                            search: $('input[name="search"]').val(),
+                            startDate: $('input[name="startDate"]').val(),
+                            endDate: $('input[name="endDate"]').val()
+                        },
+                        success: function (response) {
+                            // Update the customer table with the new data
+                            let tableContent = '';
+                            response.customers.forEach((customer, index) => {
+                                tableContent += `
+                        <tr>
+                            <td><b>${index + 1}</b></td>
+                            <td>${customer.username}</td>
+                            <td>${customer.full_name}</td>
+                            <td>${customer.email}</td>
+                            <td>${customer.phone}</td>
+                            <td>${new Date(customer.createdAt).toLocaleDateString()}</td>
+                        </tr>
+                    `;
+                            });
+                            $('#customerTable').html(tableContent); // Update the table
+                        }
+                    });
+                }
+
+                // Scroll to customer list after page reload
+                window.onload = function () {
+                    setTimeout(function () {
+                        var element = document.getElementById('customerTable');
+                        if (element) {
+                            element.scrollIntoView({ behavior: 'smooth' });
+                        }
+                    }, 1000); // Delay to ensure page fully loads before scrolling
+                };
+            </script>
+
+<script>
+    // Set max date as today for both start and end date
+    const today = new Date().toISOString().split("T")[0];
+    const startDateInput = document.querySelector('input[name="startDate"]');
+    const endDateInput = document.querySelector('input[name="endDate"]');
+
+    if (startDateInput) startDateInput.setAttribute("max", today);
+    if (endDateInput) endDateInput.setAttribute("max", today);
+
+    // Update end date's min when start date changes
+    startDateInput?.addEventListener("change", function () {
+        const startDate = this.value;
+        if (endDateInput) {
+            endDateInput.setAttribute("min", startDate);
+            // Auto-clear end date if it's before new start date
+            if (endDateInput.value && endDateInput.value < startDate) {
+                endDateInput.value = '';
+            }
+        }
+    });
+
+    // Optional: validate on end date change too
+    endDateInput?.addEventListener("change", function () {
+        const endDate = this.value;
+        if (startDateInput && endDate < startDateInput.value) {
+            alert("End Date cannot be before Start Date.");
+            this.value = "";
+        }
+    });
+</script>

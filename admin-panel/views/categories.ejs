@@ -1,0 +1,426 @@
+<%- include('layouts/sidebar'); %>
+    <%- include('layouts/header'); %>
+        <section class="content-main">
+            <div class="content-header">
+                <div>
+                    <h2 class="content-title card-title">Categories </h2>
+                    <p>Add, edit or delete a category</p>
+                </div>
+                <div class="d-flex gap-2 mb-3">
+                    <input type="text" id="searching" placeholder="Search Categories" class="form-control border"
+                        style="max-width: 400px;">
+                    <button id="clearFilters" class="btn btn-danger" style="width: 200px;">Clear Filters</button>
+                </div>
+
+
+            </div>
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <form action="/categories" style="margin: 10px;" method="post" enctype='multipart/form-data'>
+                                <div class="mb-4">
+                                    <label for="product_name" class="form-label">Name</label>
+                                    <input name="name" type="text" placeholder="Type here" class="form-control border"
+                                        id="product_name">
+                                </div>
+                                <div class="mb-4">
+                                    <label for="product_slug" class="form-label">Slug</label>
+                                    <input name="slug" type="text" placeholder="Type here" class="form-control border"
+                                        id="product_slug">
+                                </div>
+                                <div class="mb-4">
+                                    <label class="form-label">Parent</label>
+                                    <select name="parent" class="form-select border">
+                                        <option value="select-parent">Select Parent</option>
+                                        <% for( let i=0; i < parent.length; i++ ) { %>
+                                            <option value="<%= parent[i]._id %>">
+                                                <%= parent[i].name %>
+                                            </option>
+                                            <% } %>
+                                    </select>
+                                </div>
+                                <div class="card mb-4 cover_photo">
+                                    <div class="card-header border">
+                                        <h4>Cover Photo</h4>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="input-upload border">
+                                            <img id="cover_photo" src="assets/imgs/theme/upload.svg" alt="">
+                                            <input name="cover_photo" class="form-control" type="file"
+                                                onchange="coverPhoto(event)" accept="image/*">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mb-4 " id="subParent"></div>
+                                <!-- <div class="mb-4 gst">
+                                <label class="form-label">Gst Rate</label>
+                                <input type="number" name="gst" placeholder="%" class="form-control" id="product_name">
+                            </div> -->
+                                <div class="mb-4">
+                                    <label class="form-label">Description</label>
+                                    <textarea name="description" placeholder="Type here"
+                                        class="form-control border"></textarea>
+                                </div>
+                                <div class="d-grid">
+                                    <button value="addCategories" name="submit" type="submit"
+                                        class="btn btn-primary">Create category</button>
+                                </div>
+                            </form>
+                            <p class="text-warning message">
+                                <%= message %>
+                            </p>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="table-responsive">
+                                <table class="table table-hover border">
+                                    <thead class="border">
+                                        <tr>
+                                            <th class="text-center">
+                                                <div class="form-check">
+                                                    <input class="form-check-input border" type="checkbox" value="">
+                                                </div>
+                                            </th>
+                                            <th>ID</th>
+                                            <th>Image</th>
+                                            <th>Name</th>
+                                            <th>Description</th>
+                                            <th>Slug</th>
+                                            <th>Type</th>
+                                            <th class="text-end">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% for( let i=0; i < categoriesData.docs.length; i++ ) { %>
+                                            <tr>
+                                                <td class="text-center">
+                                                    <% if (categoriesData.docs[i].parent !==undefined) { %>
+                                                        <i
+                                                            class="material-icons md-subdirectory_arrow_right text-muted"></i>
+                                                        <% }else{ %>
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox"
+                                                                    value="">
+                                                            </div>
+                                                            <% } %>
+                                                </td>
+                                                <td>
+                                                    <%= i + 1 %>
+                                                </td>
+                                                <td>
+                                                    <div class="left" style="width: 100px;height: auto;">
+                                                        <% if (categoriesData.docs[i].cover_image &&
+                                                            categoriesData.docs[i].cover_image.path) { %>
+                                                            <img src="<%= categoriesData.docs[i].cover_image.path %>"
+                                                                style="width: auto;height: auto;"
+                                                                class="img-sm img-thumbnail" alt="Category Image">
+                                                            <% } else { %>
+                                                                <p style="font-weight: bold;">No Image</p>
+                                                                <% } %>
+                                                    </div>
+                                                </td>
+                                                <td><b>
+                                                        <%= categoriesData.docs[i].name %>
+                                                    </b></td>
+                                                <td>
+                                                    <%= categoriesData.docs[i].description %>
+                                                </td>
+                                                <td>
+                                                    <%= categoriesData.docs[i].slug %>
+                                                </td>
+                                                <td>
+                                                    <% if (categoriesData.docs[i].parent===undefined) { %>
+                                                        Parent
+                                                        <% }else if(categoriesData.docs[i].sub_parent===undefined){ %>
+                                                            <%= categoriesData.docs[i].parent.name %>
+                                                                <% }else{ %>
+                                                                    <%= categoriesData.docs[i].sub_parent.name %>
+                                                                        <% } %>
+                                                </td>
+                                                <td class="text-end">
+                                                    <div class="dropdown">
+                                                        <a href="#" data-bs-toggle="dropdown"
+                                                            class="btn btn-light rounded btn-sm font-sm"> <i
+                                                                class="material-icons md-more_horiz"></i> </a>
+                                                        <div class="dropdown-menu"
+                                                            style="transform: translate(-125px, 32px)!important;">
+                                                            <a class="dropdown-item"
+                                                                onclick="edit('<%= categoriesData.docs[i]._id %>')"
+                                                                href="#">Edit info</a>
+                                                            <a class="dropdown-item text-danger"
+                                                                onclick="deleting('<%= categoriesData.docs[i]._id %>')"
+                                                                href="#">Delete</a>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <% } %>
+                                    </tbody>
+                                    <input id="totalPages" type="text" hidden value='<%= categoriesData.totalPages %>''>
+                        </table>
+
+                    </div>
+                    <div class="paginations">
+                        <nav aria-label="Page navigation example">
+                            <ul class="pagination" id="pagination-products">
+                            <li class="page-item"><a class="page-link" href="#">Previous</a></li>
+                            <li class="page-item"><a class="page-link" href="#">1</a></li>
+                            <li class="page-item"><a class="page-link" href="#">2</a></li>
+                            <li class="page-item"><a class="page-link" href="#">3</a></li>
+                            <li class="page-item"><a class="page-link" href="#">Next</a></li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div> <!-- .col// -->
+            </div> <!-- .row // -->
+        </div> <!-- card body .// -->
+    </div> <!-- card .// -->
+</section>
+<%- include('layouts/footer'); %>
+                                    <script>
+                                        setTimeout(() => {
+                                            $(".message").hide();
+                                        }, 3000);
+
+                                        function coverPhoto(event) {
+                                            let webImageId = document.getElementById("cover_photo");
+                                            webImageId.src = URL.createObjectURL(event.target.files[0]);
+                                            webImageId.alt = "app slider";
+                                            // $("#cover_photo").addClass("rounded border p-2 m-2");
+                                            webImageId.onload = function () {
+                                                URL.revokeObjectURL(webImageId.src);
+                                            };
+                                        }
+
+                                        let parentEvent = (val) => {
+                                            // alert("call");
+                                            let parentVal = $('[name="parent"]').val();
+                                            // console.log("parentVal is ",parentVal);
+                                            if (parentVal !== "select-parent") {
+                                                // alert("call");
+                                                $(".cover_photo").hide();
+                                                $(".gst").hide();
+                                                $("#subParent").show();
+                                                $("#subParent").html(``);
+                                                $("#subParent").append(`<label class="form-label">Sub Parent</label> <select name="subParent" class="form-select"> <option value="select-sub-parent">Select Sub Parent</option> </select>`);
+
+                                                $.post("/categories/sub-parent", { message: "get-sub-parent", id: parentVal }, function (data, status) {
+                                                    for (let i = 0; i < data.subParent.length; i++) {
+                                                        $('[name="subParent"]').append(`<option value="${data.subParent[i]._id}">${data.subParent[i].name}</option>`);
+                                                    }
+                                                    if (val) {
+                                                        $(`[name="subParent"]`).val(val);
+                                                    } else {
+                                                        // console.log("subParent have in else");
+                                                    }
+                                                });
+                                            } else {
+                                                $(".cover_photo").show();
+                                                $(".gst").show();
+                                                let parentVal2 = $('[name="parent"]').val();
+                                                if (parentVal2 === "select-parent") {
+                                                    $("#subParent").remove();
+                                                }
+                                            }
+                                            if (parentVal === undefined) {
+                                                $("#subParent").html(``);
+                                            }
+                                        }
+
+                                        $('[name="parent"]').change(function () {
+                                            parentEvent()
+                                        })
+
+                                        function edit(id) {
+                                            // console.log("edit click",id);
+                                            $.post("/categories/edit", { message: "edit-categories", id: id }, function (data, result) {
+                                                // console.log("data is",data);
+                                                $('[name="name"]').val(data.name)
+                                                $('[name="slug"]').val(data.slug)
+                                                $('[name="description"]').val(data.description)
+                                                if (data.parent) {
+                                                    // alert("calling");
+                                                    $(`[name="parent"]`).val(`${data.parent._id}`);
+                                                    // $(".cover_photo").hide();
+                                                    // $(".gst").hide();
+
+                                                    if (data.sub_parent) {
+                                                        parentEvent(data.sub_parent._id);
+                                                    } else {
+                                                        // console.log("else 1")
+                                                        parentEvent();
+                                                    }
+                                                } else {
+                                                    // console.log("else 2")
+                                                    if (data.cover_image) {
+                                                        // console.log("data.cover_image.path",data.cover_image.path);
+                                                        let webImageId = document.getElementById("cover_photo");
+                                                        webImageId.src = data.cover_image.path;
+                                                    } else {
+                                                        // console.log("data.cover_image.path");
+                                                    }
+                                                    $(".cover_photo").show();
+                                                    $(".gst").show();
+                                                    $("#subParent").remove();
+                                                    $(`[name="parent"]`).val(`select-parent`);
+                                                }
+                                                if (data.sub_parent) {
+
+                                                }
+                                                // $(`[name="gst"]`).val(`${data.gst}`);
+                                                $(`[name="submit"]`).val(id);
+                                                $(`[name="submit"]`).text("Update category");
+                                            })
+                                        }
+
+                                        function deleting(id) {
+                                            // console.log("deleting click",id);
+                                            swal({
+                                                title: "Are you sure?",
+                                                text: "Once deleted, you will not be able to recover this product file!",
+                                                icon: "warning",
+                                                buttons: true,
+                                                dangerMode: true,
+                                            }).then((willDelete) => {
+                                                if (willDelete) {
+                                                    swal("Poof! Your imaginary product has been deleted!", {
+                                                        icon: "success",
+                                                    });
+                                                    $.post(
+                                                        "/categories/delete",
+                                                        { message: "delete-categories", id: id },
+                                                        function (data, message) {
+                                                            //   console.log("result", data);
+                                                            if (data === "done") {
+                                                                location.reload();
+                                                            }
+                                                            //   console.log("page reloaded");
+                                                        }
+                                                    );
+                                                } else {
+                                                    swal("Your imaginary file is safe!");
+                                                }
+                                            });
+                                        }
+
+                                        $(function () {
+                                            totalPages = Number($("#totalPages").val())
+                                            window.pagObj = $("#pagination-products")
+                                                .twbsPagination({
+                                                    totalPages: totalPages,
+                                                    visiblePages: 3,
+                                                    onPageClick: function (event, page) {
+                                                        console.info(page + " (from options)");
+                                                    },
+                                                })
+                                                .on("page", function (event, page) {
+                                                    console.info(page + " (from event listening)");
+                                                    let send = { page: Number(page), message: "paginations-categories" };
+                                                    $.post("/categories/pagination", send, function (data) {
+                                                        // console.log(data);
+                                                        $("tbody").html("");
+                                                        jQuery.each(data.docs, function (index, data) {
+                                                            //   console.log("index is", index);
+                                                            //   console.log("index is", data);
+                                                            let td1 = ''
+                                                            let td6 = ''
+                                                            let gst = ""
+                                                            if (data.parent !== undefined) {
+                                                                td1 = `<i class="material-icons md-subdirectory_arrow_right text-muted"></i>`
+                                                            } else {
+                                                                td1 = ` <div class="form-check">
+                 <input class="form-check-input" type="checkbox" value="">
+                </div>`
+                                                            }
+
+                                                            if (data.parent === undefined) {
+                                                                td6 = "Parent"
+                                                            } else if (data.sub_parent === undefined) {
+                                                                td6 = `${data.parent.name}`
+                                                            } else {
+                                                                td6 = `${data.sub_parent.name}`
+                                                            }
+                                                            if (data.gst) {
+                                                                gst = data.gst;
+                                                            }
+                                                            let startingIndex = (page - 1) * 7;  // Adjust based on pagination
+
+                                                            $("tbody").append(`<tr>
+                                        <td class="text-center">
+                                           ${td1}
+                                        </td>
+                                        <td>${startingIndex + index + 1}</td> 
+                                        <td>
+        ${data.cover_image && data.cover_image.path
+                                                                    ? `<img src="${data.cover_image.path}" style="width: auto; height: auto;" class="img-sm img-thumbnail" alt="Category Image">`
+                                                                    : `<p>No Image</p>`}</td>
+                                        <td><b>${data.name}</b></td>
+                                        <td>${data.description}</td>
+                                        <td>${data.slug}</td>
+                                        <td>
+                                            ${td6}
+                                        </td>
+                                        <td class="text-end">
+                                            <div class="dropdown">
+                                                <a href="#" data-bs-toggle="dropdown" class="btn btn-light rounded btn-sm font-sm"> <i class="material-icons md-more_horiz"></i> </a>
+                                                <div class="dropdown-menu" style="transform: translate(-125px, 32px)!important;">
+                                                    <a class="dropdown-item" onclick="edit('${data._id}')" href="#">Edit info</a>
+                                                    <a class="dropdown-item text-danger" onclick="deleting('${data._id}')" href="#">Delete</a>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>`);
+                                                        });
+                                                    });
+                                                });
+                                        });
+
+
+
+                                        // $("#searching").on("propertychange input",function(){
+                                        $("#searching").change(function () {
+                                            // console.log("change",$("#searching").val(), "type" ,typeof $("#searching").val());
+                                            let char = $("#searching").val();
+                                            if (char === "" || char === null || char === undefined) {
+                                                // console.log("not ");
+                                                location.reload();
+                                            } else {
+                                                $.post("/categories/search", { message: "search-categories", text: char }, function (data, result) {
+                                                    // console.log("data",data);
+                                                    $("tbody").html("");
+                                                    $(".paginations").hide();
+                                                    if (data.length >= 1) {
+                                                        jQuery.each(data, function (index, data) {
+                                                            //   console.log("index is", index);
+                                                            //   console.log("index is", data);
+                                                            let td1 = ''
+                                                            let td6 = ''
+                                                            let gst = ""
+                                                            if (data.parent !== undefined) {
+                                                                td1 = `<i class="material-icons md-subdirectory_arrow_right text-muted"></i>`
+                                                            } else {
+                                                                td1 = ` <div class="form-check">  <input class="form-check-input" type="checkbox" value="">  </div>`
+                                                            }
+                                                            if (data.gst) {
+                                                                gst = data.gst;
+                                                            }
+                                                            if (data.parent === undefined) {
+                                                                td6 = "Parent"
+                                                            } else if (data.sub_parent === undefined) {
+                                                                td6 = `${data.parent}`
+                                                            } else {
+                                                                td6 = `${data.sub_parent}`
+                                                            }
+                                                            $("tbody").append(`<tr>  <td class="text-center"> ${td1}  </td>  <td>${index + 1}</td> <td><b>${data.name}</b></td>  <td>${data.description}</td>    <td>${data.slug}</td>       <td>         ${td6}      </td>      <td class="text-end">          <div class="dropdown">              <a href="#" data-bs-toggle="dropdown" class="btn btn-light rounded btn-sm font-sm"> <i class="material-icons md-more_horiz"></i> </a>              <div class="dropdown-menu" style="transform: translate(-125px, 32px)!important;">                   <a class="dropdown-item" onclick="edit('${data._id}')" href="#">Edit info</a>                   <a class="dropdown-item text-danger" onclick="deleting('${data._id}')" href="#">Delete</a>              </div>           </div>       </td>   </tr>`);
+                                                        });
+                                                    }
+                                                })
+                                            }
+                                        })
+                                    </script>
+
+                                    <script>
+                                        $("#clearFilters").click(function () {
+                                            window.location.href = window.location.pathname; // Redirects to the same page
+                                        });
+                                    </script>

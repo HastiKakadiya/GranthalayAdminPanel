@@ -1,0 +1,213 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Example 1</title>
+    <style>
+        .clearfix:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+a {
+  color: #5D6975;
+  text-decoration: underline;
+}
+
+body {
+  position: relative;
+  /* width: 21cm;   */
+  /* height: 29.7cm;  */
+  margin: 0 auto; 
+  color: #001028;
+  background: #FFFFFF; 
+  font-family: Arial, sans-serif; 
+  font-size: 12px; 
+  font-family: Arial;
+}
+
+header {
+  padding: 10px 0;
+  margin-bottom: 30px;
+}
+
+#logo {
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+#logo img {
+  width: 90px;
+}
+
+h1 {
+  border-top: 1px solid  #5D6975;
+  border-bottom: 1px solid  #5D6975;
+  color: #5D6975;
+  font-size: 2.4em;
+  line-height: 1.4em;
+  font-weight: normal;
+  text-align: center;
+  margin: 0 0 20px 0;
+  background: url(dimension.png);
+}
+
+#project {
+  float: left;
+}
+
+#project span {
+  color: #5D6975;
+  text-align: right;
+  width: 52px;
+  margin-right: 10px;
+  display: inline-block;
+  font-size: 0.8em;
+}
+
+#company {
+  float: right;
+  text-align: right;
+}
+
+#project div,
+#company div {
+  white-space: nowrap;        
+}
+
+table {
+  /* width: 100%; */
+  border-collapse: collapse;
+  border-spacing: 0;
+  margin-bottom: 20px;
+}
+
+table tr:nth-child(2n-1) td {
+  background: #F5F5F5;
+}
+
+table th,
+table td {
+  text-align: center;
+}
+
+table th {
+  padding: 5px 20px;
+  color: #5D6975;
+  border-bottom: 1px solid #C1CED9;
+  white-space: nowrap;        
+  font-weight: normal;
+}
+
+table .service,
+table .desc {
+  text-align: left;
+}
+
+table td {
+  padding: 20px;
+  text-align: right;
+}
+
+table td.service,
+table td.desc {
+  vertical-align: top;
+}
+
+table td.unit,
+table td.qty,
+table td.total {
+  font-size: 1.2em;
+}
+
+table td.grand {
+  border-top: 1px solid #5D6975;;
+}
+
+#notices .notice {
+  color: #5D6975;
+  font-size: 1.2em;
+}
+/* .text-wrap{
+  width: 50px;
+  word-wrap: break-word;
+} */
+    </style>
+  </head>
+  <body>
+    <header class="clearfix">
+      <!-- <div id="logo">
+        <img src="logo.png">
+      </div> -->
+      <h1>INVOICE DETAILS</h1>
+      <div id="company" class="clearfix">
+        <div><h2>Deliver to</h2></div>
+        <% if (data.shipingOther == true) { %>
+            Full Name : <%= data.shipingDetails.firstName %>  <%= data.shipingDetails.lastName %>,
+            <br>Phone : <%= data.shipingDetails.phone %>,
+            <br>address : <%= data.shipingDetails.address %> <br><%= data.shipingDetails.address2 %>,
+            address : <%= data.shipingDetails.address %> <br><%= data.shipingDetails.address2 %>,
+            <br>city : <%= data.shipingDetails.city %>
+            <br>state : <%= data.shipingDetails.state %>
+            <br>country : <%= data.shipingDetails.country %>,
+            <br>pincode : <%= data.shipingDetails.pincode %>
+        <% }else{ %>
+            address : <%= data.billingDetails.address %> <br><%= data.billingDetails.address2 %>,
+            <br>city : <%= data.billingDetails.city %>,
+            <br>state : <%= data.billingDetails.state %>,
+            <br>country : <%= data.billingDetails.country %>,
+            <br>pincode : <%= data.billingDetails.pincode %>
+        <% } %>
+      </div>
+      <div id="project">
+        <div><h2>Customer info</h2></div>
+        <div><span>Name: </span><%= data.customer_id.full_name %></div>
+        <div><span>Phone:</span><%= data.customer_id.phone %></div>
+        <div><span>Email:</span><a href="mailto:<%= data.customer_id.email %>"><%= data.customer_id.email %></a></div>
+        <div><span>DATE:</span><%= date %></div>
+      </div>
+    </header>
+    <main>
+      <table>
+        <thead>
+          <tr>
+            <th class="service">No</th>
+            <th class="desc">Product</th>
+            <th>Unit Price</th>
+            <th>Quantity</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+            <% for( let i = 0; i < data.cart.length; i++ ) { %>
+                <tr>
+                  <td class="service"><%= i + 1 %> </td>
+                  <td class="desc text-wrap"><%= data.cart[i].product_id.title %></td>
+                  <td class="unit">₹<%= data.cart[i].product_id.assign_price %></td>
+                  <td class="qty"><%= data.cart[i].qty %></td>
+                  <td class="total">₹<%= data.cart[i].product_id.assign_price * data.cart[i].qty %></td>
+                </tr>
+            <% } %>
+          <tr>
+            <td colspan="4">Subtotal:</td>
+            <td class="total">₹<%= data.subTotal %></td>
+          </tr>
+          <tr>
+            <td colspan="4">Shipping cost::</td>
+            <td class="total">₹<%= data.shipingCost %></td>
+          </tr>
+          <tr>
+            <td colspan="4">Discount</td>
+            <td class="total">₹<%= data.discount %></td>
+          </tr>
+          <tr>
+            <td colspan="4" class="grand total">Grand total:</td>
+            <td class="grand total">₹<%= (data.subTotal + data.shipingCost) - data.discount %></td>
+          </tr>
+        </tbody>
+      </table>
+    </main>
+  </body>
+</html>

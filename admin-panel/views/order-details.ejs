@@ -1,0 +1,415 @@
+<%- include('layouts/sidebar'); %>
+    <%- include('layouts/header'); %>
+
+        <section class="content-main">
+            <div class="content-header d-flex align-items-center justify-content-between">
+                <h2 class="content-title card-title">Order Detail</h2>
+                <div>
+                    <a href="/order" class="btn btn-secondary">Back to Orders</a>
+                </div>
+            </div>
+
+            <!-- Order Details Section -->
+            <div id="order-details">
+                <% if (data) { %>
+                    <% let order=data; %>
+                        <% let dateObj=new Date(order.createdAt); %>
+                            <% let month=dateObj.getMonth() + 1; %> <!-- getMonth() returns a 0-based month -->
+                                <% let dateFormatted=dateObj.getDate() + "/" + month + "/" + dateObj.getFullYear(); %>
+                                               <h4 style="margin: 10px;"><strong>Order ID:</strong>
+                                        <%= order.orderNumber %>
+                                    </h4>
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="card shadow-sm mb-4">
+                                                <div class="card-header text-white" style="background-color:#198754 ;">
+                                                    <h4 class="card-title mb-0">Order Items</h4>
+                                                </div>
+
+                                                <div class="card-body">
+                                                    <% if (orderItems && orderItems.length> 0) { %>
+                                                        <table class="table">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>#</th>
+                                                                    <th>Product Name</th>
+                                                                    <th>Price (₹)</th>
+                                                                    <th>Quantity</th>
+                                                                    <th>Total (₹)</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <% orderItems.forEach((item, index)=> { %>
+                                                                    <tr>
+                                                                        <td>
+                                                                            <%= index + 1 %>
+                                                                        </td>
+
+                                                                        <td>
+                                                                            <%= item.productID.title || 'N/A' %>
+                                                                        </td>
+                                                                        <td>
+                                                                            <%= item.price %>
+                                                                        </td>
+                                                                        <td>
+                                                                            <%= item.quantity %>
+                                                                        </td>
+                                                                        <td>
+                                                                            <%= item.price * item.quantity %>
+                                                                        </td>
+                                                                    </tr>
+                                                                    <% }); %>
+                                                            </tbody>
+                                                        </table>
+                                                        <% } else { %>
+                                                            <p>No items found in this order.</p>
+                                                            <% } %>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="row">
+                                        <!-- Order Summary -->
+                                        <% let subTotal=0; orderItems?.forEach(item=> {
+                                            subTotal += item.price * item.quantity;
+                                            });
+
+                                            let shippingCharge = order.shipping_charge_id?.shipping_charge || 0;
+                                            let totalCost = subTotal + shippingCharge;
+                                            %>
+
+                                            <div class="col-md-6">
+                                                <div class="card shadow-sm mb-4">
+                                                    <div class="card-header text-white"
+                                                        style="background-color: rgb(202, 113, 34);">
+                                                        <h4 class="card-title mb-0">Order Summary</h4>
+                                                    </div>
+                                                    <div class="card-body">
+
+                                                        <p><strong>Order Date:</strong>
+                                                            <%= dateFormatted %>
+                                                        </p>
+                                                        <p><strong>Status:</strong>
+                                                            <%= order.status %>
+                                                        </p>
+                                                        <p><strong>Order Type:</strong>
+                                                            <%= order.type %>
+                                                        </p>
+
+                                                        <p><strong>Quantity:</strong>
+                                                            <%= order.quantity %>
+                                                        </p>
+                                                        <p><strong>Order Status:</strong>
+                                                            <% if (order.status==='pending' ) { %>
+                                                                <span
+                                                                    style="background-color: #ffc107; color: #000; padding: 4px 10px; border-radius: 6px; font-weight: 600;">
+                                                                    ⏳ Pending
+                                                                </span>
+                                                                <% } else if (order.status==='processing' ) { %>
+                                                                    <span
+                                                                        style="background-color: #0d6efd; color: #fff; padding: 4px 10px; border-radius: 6px; font-weight: 600;">
+                                                                        🔧 Processing
+                                                                    </span>
+                                                                    <% } else if (order.status==='shipped' ) { %>
+                                                                        <span
+                                                                            style="background-color: #0dcaf0; color: #000; padding: 4px 10px; border-radius: 6px; font-weight: 600;">
+                                                                            🚚 Shipped
+                                                                        </span>
+                                                                        <% } else if (order.status==='delivered' ) { %>
+                                                                            <span
+                                                                                style="background-color: #198754; color: #fff; padding: 4px 10px; border-radius: 6px; font-weight: 600;">
+                                                                                ✅ Delivered
+                                                                            </span>
+                                                                            <% } else if (order.status==='cancelled' ) {
+                                                                                %>
+                                                                                <span
+                                                                                    style="background-color: #dc3545; color: #fff; padding: 4px 10px; border-radius: 6px; font-weight: 600;">
+                                                                                    ❌ Cancelled
+                                                                                </span>
+                                                                                <% } else { %>
+                                                                                    <span
+                                                                                        style="background-color: #6c757d; color: #fff; padding: 4px 10px; border-radius: 6px; font-weight: 600;">
+                                                                                        🔘 <%= order.status %>
+                                                                                    </span>
+                                                                                    <% } %>
+                                                        </p>
+
+                                                        <p><strong>Payment Status:</strong>
+
+                                                            <% if (order.payment) { %>
+                                                                <span class="text-success">✅ Paid</span>
+                                                                <% } else { %>
+                                                                    <span class="text-danger">❌ Pending</span>
+                                                                    <% } %>
+
+                                                    </div>
+                                                </div>
+                                            </div>
+
+
+                                            <!-- Customer Information -->
+                                            <div class="col-md-6">
+                                                <div class="card shadow-sm mb-4">
+                                                    <div class="card-header bg-success text-white">
+                                                        <h4 class="card-title mb-0">Customer Information</h4>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <p><strong>Name:</strong>
+                                                            <%= order.customer_id?.full_name || 'N/A' %>
+                                                        </p>
+                                                        <p><strong>Phone:</strong>
+                                                            <%= order.customer_id?.phone || 'N/A' %>
+                                                        </p>
+                                                        <p><strong>Email:</strong>
+                                                            <%= order.customer_id?.email || 'N/A' %>
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="card shadow-sm mb-4">
+                                                <div class="card-header text-dark" style="background-color: #0056b3;">
+                                                    <h4 class="card-title mb-0">Payment Details</h4>
+                                                </div>
+                                                <div class="card-body">
+                                                    <p><strong>Sub Total:</strong> ₹ <%= subTotal.toFixed(2) %> /-
+                                                    </p>
+                                                    <p><strong>Shipping Charge:</strong> + ₹ <%=
+                                                            shippingCharge.toFixed(2) %> /-</p>
+                                                    <p><strong>Total Amount:</strong> ₹ <%= totalCost.toFixed(2) %> /-
+                                                    </p>
+
+                                                    <p><strong>Payment Status:</strong>
+                                                        <% if(order.payment) { %>
+                                                            <span class="text-success">Paid</span>
+                                                            <% } else { %>
+                                                                <span class="text-danger">Pending (Payment not
+                                                                    received)</span>
+                                                                <% } %>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- Shipping Details (if available) -->
+                                        <% if(order.shipping_charge_id) { %>
+                                            <div class="col-md-6">
+                                                <div class="card shadow-sm mb-4">
+                                                    <div class="card-header bg-info text-white">
+                                                        <h4 class="card-title mb-0">Shipping Details</h4>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <!-- Display Shipping Charge Details -->
+                                                        <% if(order.shipping_charge_id.shipping_charge) { %>
+                                                            <p><strong>Shipping Charge:</strong> ₹ <%=
+                                                                    order.shipping_charge_id.shipping_charge %>/-</p>
+                                                            <p><strong>Delivery Time:</strong>
+                                                                <%= order.shipping_charge_id.delivery_time %>
+                                                            </p>
+                                                            <p><strong>Location:</strong>
+                                                                <%= order.shipping_charge_id.city %>, <%=
+                                                                        order.shipping_charge_id.state %>
+                                                            </p>
+                                                            <% } else { %>
+                                                                <p><strong>Shipping Charge:</strong> ₹ N/A</p>
+                                                                <p><strong>Delivery Time:</strong> N/A</p>
+                                                                <p><strong>Location:</strong> N/A, N/A</p>
+                                                                <% } %>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <% } %>
+                                    </div>
+
+
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="card shadow-sm mb-4">
+                                                <div class="card-header bg-warning text-dark">
+                                                    <h4 class="card-title mb-0">Order Status</h4>
+                                                </div>
+                                                <div class="order-status-container"
+                                                    style="display: flex; align-items: center; gap: 10px;margin: 20px;">
+                                                    <select id="orderStatus" class="form-control"
+                                                        style="padding: 8px; border-radius: 5px; font-size: 16px;">
+                                                        <option value="Pending" <%=order.status==='Pending' ? 'selected'
+                                                            : '' %>>🟡 Pending</option>
+                                                        <option value="Processing" <%=order.status==='Processing'
+                                                            ? 'selected' : '' %>>🔄 Processing</option>
+                                                        <option value="Shipped" <%=order.status==='Shipped' ? 'selected'
+                                                            : '' %>>🚚 Shipped</option>
+                                                        <option value="Delivered" <%=order.status==='Delivered'
+                                                            ? 'selected' : '' %>>✅ Delivered</option>
+                                                        <option value="Cancelled" <%=order.status==='Cancelled'
+                                                            ? 'selected' : '' %>>❌ Cancelled</option>
+                                                    </select>
+
+                                                    <button id="updateStatusBtn" class="styled-button"
+                                                        style="width: 35%;">
+                                                        🚀 Update Status
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <div class="card shadow-sm mb-4">
+                                                <div class="card-header bg-danger text-white">
+                                                    <h4 class="card-title mb-0">Payment Status</h4>
+                                                </div>
+                                                <div class="order-status-container d-flex align-items-center gap-2 p-3">
+                                                    <select id="paymentStatus" class="form-control"
+                                                        style="width: 450px;">
+                                                        <option value="true" <%=order.payment ? 'selected' : '' %>>✅
+                                                            Paid
+                                                        </option>
+                                                        <option value="false" <%=!order.payment ? 'selected' : '' %>>❌
+                                                            Pending</option>
+                                                    </select>
+                                                    <button type="button" id="updatePaymentBtn" class="styled-button">💳
+                                                        Update Payment</button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+                                    <% } else { %>
+                                        <div class="alert alert-danger">
+                                            Order not found.
+                                        </div>
+                                        <% } %>
+            </div>
+        </section>
+
+        <%- include('layouts/footer'); %>
+            <script>
+                document.getElementById("updateStatusBtn").addEventListener("click", function () {
+                    let newStatus = document.getElementById("orderStatus").value;
+                    let orderId = "<%= order && order._id ? order._id.toString() : '' %>";
+
+                    if (!orderId) {
+                        alert("⚠️ Order ID not found!");
+                        return;
+                    }
+
+                    fetch("/order-details/update-status", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ orderId, newStatus }),
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                alert("✅ Order status updated successfully!");
+                                location.reload(); // Refresh the page to reflect changes
+                            } else {
+                                alert("⚠️ " + data.message);
+                            }
+                        })
+                        .catch(error => {
+                            console.error("❌ Error:", error);
+                            alert("❌ Something went wrong! Please try again.");
+                        });
+                });
+            </script>
+            <style>
+                .styled-button {
+                    margin: 30px;
+                    padding: 12px 20px;
+                    border: none;
+                    border-radius: 8px;
+                    font-size: 16px;
+                    font-weight: bold;
+                    background: linear-gradient(135deg, #007bff, #0056b3);
+                    color: white;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                    box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                }
+
+                .styled-button:hover {
+                    background: linear-gradient(135deg, #0056b3, #004085);
+                    transform: scale(1.05);
+                    box-shadow: 0 6px 12px rgba(0, 123, 255, 0.5);
+                }
+
+                .styled-button:active {
+                    transform: scale(0.98);
+                    box-shadow: 0 2px 5px rgba(0, 123, 255, 0.5);
+                }
+            </style>
+
+            <script>
+                document.getElementById("updatePaymentBtn").addEventListener("click", function () {
+                    let newPaymentStatus = document.getElementById("paymentStatus").value === "true";
+                    let orderId = "<%= order && order._id ? order._id.toString() : '' %>";
+
+                    if (!orderId) {
+                        alert("⚠️ Order ID not found!");
+                        return;
+                    }
+
+                    fetch("/order-details/update-payment", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ orderId, newPaymentStatus }),
+                    })
+                        .then((response) => response.json())
+                        .then((data) => {
+                            if (data.success) {
+                                alert("✅ Payment status updated successfully!");
+                                location.reload();
+                            } else {
+                                alert("⚠️ " + data.message);
+                            }
+                        })
+                        .catch((error) => {
+                            console.error("❌ Error:", error);
+                            alert("❌ Something went wrong while updating payment status.");
+                        });
+                });
+            </script>
+
+            <style>
+                .badge {
+                    display: inline-block;
+                    padding: 0.35em 0.65em;
+                    font-size: 0.85em;
+                    font-weight: 600;
+                    border-radius: 0.5rem;
+                    color: white;
+                }
+
+                .bg-warning {
+                    background-color: #ffc107;
+                    color: #000;
+                }
+
+                .bg-primary {
+                    background-color: #0d6efd;
+                }
+
+                .bg-info {
+                    background-color: #0dcaf0;
+                    color: #000;
+                }
+
+                .bg-success {
+                    background-color: #198754;
+                }
+
+                .bg-danger {
+                    background-color: #dc3545;
+                }
+
+                .bg-secondary {
+                    background-color: #6c757d;
+                }
+            </style>

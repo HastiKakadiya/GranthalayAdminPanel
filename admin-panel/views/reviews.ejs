@@ -1,0 +1,137 @@
+<%- include('layouts/sidebar'); %>
+    <%- include('layouts/header'); %>
+
+        <section class="content-main">
+            <div class="content-header">
+                <div>
+                    <h2 class="content-title card-title">Reviews List</h2>
+                </div>
+
+            </div>
+
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <input type="text" id="searchInput" class="form-control border"
+                        placeholder="Search by ID, Description, Product ID, Customer ID...">
+                </div>
+                <div class="col-md-3">
+                    <select id="ratingFilter" class="form-select border">
+                        <option value="">All Ratings</option>
+                        <option value="5">5 Stars</option>
+                        <option value="4">4 Stars</option>
+                        <option value="3">3 Stars</option>
+                        <option value="2">2 Stars</option>
+                        <option value="1">1 Star</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select id="sortFilter" class="form-select border">
+                        <option value="desc">Newest First</option>
+                        <option value="asc">Oldest First</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select id="limitFilter" class="form-select border">
+                        <option value="10">Show 10</option>
+                        <option value="20">Show 20</option>
+                        <option value="50">Show 50</option>
+                        <option value="100">Show 100</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button id="clearFilters" class="btn btn-danger">Clear Filters</button>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover border">
+                            <thead class="border">
+                                <tr>
+                                    <th>No</th>
+                                    <th>Description</th>
+                                    <th>Rate</th>
+                                    <th>Product ID</th>
+                                    <th>Customer ID</th>
+                                    <th>Create Date</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <input type="number" hidden id="totalPages" value="<%= data %>">
+            <div class="paginations">
+                <nav>
+                    <ul class="pagination" id="pagination-reviews"></ul>
+                </nav>
+            </div>
+        </section>
+
+        <%- include('layouts/footer'); %>
+
+            <script>
+                $("#clearFilters").click(function () {
+                    window.location.href = window.location.pathname; // Redirects to the same page
+                });
+                $(function () {
+                    let totalPages = Number($("#totalPages").val());
+
+                    window.pagObj = $("#pagination-reviews").twbsPagination({
+                        totalPages: totalPages,
+                        visiblePages: 3,
+                        onPageClick: function (event, page) {
+                            fetchReviews(page);
+                        },
+                    });
+
+                    function fetchReviews(page) {
+                        let search = $("#searchInput").val();
+                        let rating = $("#ratingFilter").val();
+                        let sortBy = $("#sortFilter").val();
+                        let limit = $("#limitFilter").val();
+
+                        let send = {
+                            page: Number(page),
+                            search: search,
+                            rate: rating,
+                            sortBy: sortBy,
+                            limit: limit,
+                            message: "paginations-reviews"
+                        };
+
+                        $.post("/reviews/pagination", send, function (data) {
+                            $("tbody").html("");
+                            jQuery.each(data.docs, function (index, data) {
+                                let dateObj = new Date(data.createdAt);
+                                let dateFormatted = dateObj.getDate() + "/" + (dateObj.getMonth() + 1) + "/" + dateObj.getFullYear();
+
+                                $("tbody").append(`
+                    <tr>
+                        <td>${(page - 1) * limit + index + 1}</td>
+                        <td>${data.description}</td>
+                        <td>${data.rate} Stars</td>
+                        <td><b>${data.product_id}</b></td>
+                        <td><b>${data.customer_id}</b></td>
+                        <td>${dateFormatted}</td>
+                    </tr>
+                `);
+                            });
+                        });
+                    }
+
+                    $("#searchInput, #ratingFilter, #sortFilter, #limitFilter").on("input change", function () {
+                        fetchReviews(1);
+                    });
+
+                    $("#clearFilters").click(function () {
+                        $("#ratingFilter").val("");
+                        $("#sortFilter").val("desc");
+                        $("#limitFilter").val("10");
+                        fetchReviews(1);
+                    });
+                });
+            </script>

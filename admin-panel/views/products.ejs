@@ -1,0 +1,623 @@
+<style>
+    .dropdown-submenu {
+        position: relative;
+    }
+
+    .dropdown-submenu>.dropdown-menu {
+        top: 0;
+        left: 100%;
+        margin-top: -1px;
+        display: none;
+    }
+
+    .dropdown-submenu:hover>.dropdown-menu {
+        display: block;
+    }
+
+    .dropdown-menu {
+        background-color: #1e1e2f;
+        border-radius: 6px;
+        padding: 0.5rem 0;
+        min-width: 200px;
+    }
+
+    .dropdown-item {
+        color: white;
+        padding: 8px 16px;
+    }
+
+    .dropdown-item:hover {
+        background-color: #2a2a3d;
+    }
+</style>
+
+<%- include('layouts/sidebar'); %>
+    <%- include('layouts/header'); %>
+
+        <section class="content-main">
+            <div class="content-header">
+                <div>
+                    <h2 class="content-title card-title">Products List</h2>
+                </div>
+
+            </div>
+            <div class="d-flex align-items-center justify-content-left mb-3">
+
+                <div class="search-container" style="flex:2; width: 100%;margin-bottom: 20px;">
+                    <input type="text" id="searchInput" placeholder="Search products..." class="form-control border">
+                </div>
+
+                <div class="dropdown" style="flex: 4; margin-bottom: 20px;">
+                    <button class="btn genre-dropdown-btn dropdown-toggle" type="button" id="genreFilterDropdown"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                        Select Genre
+                    </button>
+
+                    <ul class="dropdown-menu" id="genreFilter">
+                        <% if (categories && categories.length> 0) { %>
+                            <% categories.forEach(category=> { %>
+                                <% if (!category.parent && !category.sub_parent) { %> <!-- Parent category only -->
+                                    <li class="dropdown-submenu position-relative">
+                                        <a class="dropdown-item genre-main" href="#" data-id="<%= category._id %>">
+                                            <%= category.name %>
+                                        </a>
+
+                                        <% const subcategories=categories.filter(sub=> String(sub.parent) ===
+                                            String(category._id) && !sub.sub_parent); %>
+                                            <% if (subcategories.length> 0) { %>
+                                                <ul
+                                                    class="dropdown-menu subcategory-menu position-absolute start-100 top-0">
+                                                    <% subcategories.forEach(sub=> { %>
+                                                        <li class="dropdown-submenu position-relative">
+                                                            <a class="dropdown-item genre-sub" href="#"
+                                                                data-id="<%= sub._id %>">
+                                                                <%= sub.name %>
+                                                            </a>
+
+                                                            <% const childCategories=categories.filter(child=>
+                                                                String(child.parent) === String(category._id) &&
+                                                                String(child.sub_parent) === String(sub._id)); %>
+                                                                <% if (childCategories.length> 0) { %>
+                                                                    <ul
+                                                                        class="dropdown-menu position-absolute start-100 top-0">
+                                                                        <% childCategories.forEach(child=> { %>
+                                                                            <li>
+                                                                                <a class="dropdown-item genre-child"
+                                                                                    href="#" data-id="<%= child._id %>">
+                                                                                    <%= child.name %>
+                                                                                </a>
+                                                                            </li>
+                                                                            <% }) %>
+                                                                    </ul>
+                                                                    <% } %>
+                                                        </li>
+                                                        <% }) %>
+                                                </ul>
+                                                <% } %>
+                                    </li>
+                                    <% } %>
+                                        <% }) %>
+                                            <% } else { %>
+                                                <li><span class="dropdown-item">No Categories Available</span></li>
+                                                <% } %>
+                    </ul>
+                </div>
+
+
+                <div class="d-flex align-items-center gap-3 mb-3">
+
+                    <button id="clearFilters" class="btn btn-danger">Clear Filters</button>
+
+                </div>
+                <div class="d-flex align-items-center gap-3 mb-3" style="margin-left: 20px;">
+                    <!-- <a href="/product-add" class="btn btn-primary btn-sm rounded">Add Products</a> -->
+                    <a href="/products-create" class="btn btn-primary btn-sm rounded">Add Products</a>
+                </div>
+
+            </div>
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover border">
+                            <thead class="table-dark text-center border">
+                                <tr>
+                                    <th>Index</th>
+                                    <!-- <th scope="col"><input type="checkbox"></th> -->
+                                    <th scope="col">Image</th>
+                                    <th scope="col">Product Name</th>
+                                    <th scope="col">Category</th>
+                                    <th scope="col">Subcategory</th>
+                                    <th scope="col">Price</th>
+                                    <th scope="col">Total Stock</th>
+                                    <th scope="col">Stock Status</th>
+                                    <th scope="col">Is Active</th>
+                                    <th scope="col">Languages</th>
+                                    <th scope="col">Created Date</th>
+                                    <th scope="col">Actions</th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="productTableBody">
+                                <% if (productsData && productsData.docs && productsData.docs.length> 0) { %>
+                                    <% for (let i=0; i < productsData.docs.length; i++) { %>
+                                        <% let product=productsData.docs[i]; %>
+                                            <tr class="align-middle text-center">
+                                                <!-- <td><input type="checkbox"></td> -->
+                                                <td>
+                                                    <%= i + 1 %>
+                                                </td>
+
+                                                <td>
+                                                    <img src="<%= product.cover_image ? product.cover_image.path : 'default.jpg' %>"
+                                                        class="img-sm img-thumbnail" alt="Product Image" width="50">
+                                                </td>
+                                                <td class="text-start">
+                                                    <%= product.title %>
+                                                </td>
+                                                <td>
+                                                    <% if (product.parent_categories &&
+                                                        product.parent_categories.length> 0) { %>
+                                                        <%= product.parent_categories[0].name %>
+                                                            <% } else { %> - <% } %>
+                                                </td>
+                                                <td>
+                                                    <% if (product.sub_categories && product.sub_categories.length> 0) {
+                                                        %>
+                                                        <%= product.sub_categories[0].name %>
+                                                            <% } else { %> - <% } %>
+                                                </td>
+                                                <td>₹<%= product.assign_price ? product.assign_price : 0.00 %>
+                                                </td>
+                                                <td>
+                                                    <%= product.total_stock ? product.total_stock: 0.00 %>
+                                                </td>
+                                                <td>
+                                                    <% if (product.total_stock===0) { %>
+                                                        <span class="badge rounded-pill alert-danger">Out of
+                                                            Stock</span>
+                                                        <% } else if (product.total_stock <=10) { %>
+                                                            <span class="badge rounded-pill alert-warning">Low
+                                                                Stock</span>
+                                                            <% } else { %>
+                                                                <span class="badge rounded-pill alert-success">In
+                                                                    Stock</span>
+                                                                <% } %>
+                                                </td>
+
+
+                                                <td>
+                                                    <% if (product.status) { %>
+                                                        <span class="badge bg-success">Active</span>
+                                                        <% } else { %>
+                                                            <span class="badge bg-danger">Inactive</span>
+                                                            <% } %>
+                                                </td>
+
+                                                <td>
+                                                    <% if (product.languages && product.languages.length> 0) { %>
+
+                                                        <% product.languages.forEach(function(lang) { %>
+                                                            <%= lang %> <br>
+                                                                <% }); %>
+                                                                    <% } else { %> N/A <% } %>
+                                                </td>
+
+                                                <td class="date<%=i %>">
+                                                    <% if (product.createdAt) { %>
+                                                        <%= new Date(product.createdAt).toLocaleDateString("en-US") %>
+                                                            <% } else { %>
+                                                                N/A
+                                                                <% } %>
+                                                </td>
+
+                                                <td>
+                                                    <!-- <a href="/products-details?id=<%= product._id %>"
+                                                        class="btn btn-sm font-sm rounded btn-brand">
+                                                        <i class="material-icons"></i> View
+                                                    </a> -->
+
+                                                    <a href="/products-details?id=<%= product._id %>"
+                                                        class="btn btn-sm font-sm rounded btn-view">
+                                                        <i class="toggle-password eye-icon"
+                                                            data-target="password">&#128065;</i>
+                                                    </a>
+                                                    <a href="/products-update/edit/<%= product._id %>"
+                                                        class="btn btn-sm font-sm rounded btn-brand">
+
+                                                        <i class="material-icons md-edit"></i>
+                                                    </a>
+
+
+                                                    <!-- <a href="/products-update/edit/<%= product._id %>" 
+                                                        class="btn btn-sm font-sm rounded btn-brand">
+                                                        <i class="material-icons md-edit"></i>
+                                                    </a> -->
+                                                    <a onclick="confirmDelete('<%= product._id %>')" href="#"
+                                                        class="btn btn-sm font-sm btn-light rounded">
+                                                        <i style="color: red;"
+                                                            class="material-icons md-delete_forever"></i>
+                                                    </a>
+
+                                                </td>
+                                            </tr>
+                                            <% } %>
+                                                <% } else { %>
+                                                    <tr>
+                                                        <td colspan="11" class="text-center">No products found</td>
+                                                    </tr>
+                                                    <% } %>
+                            </tbody>
+
+                        </table>
+
+
+                    </div>
+                </div>
+            </div>
+
+            <input type="number" hidden id="totalPages" value="<%= productsData.totalPages %>">
+
+            <div class="paginations">
+                <nav aria-label="Page navigation example">
+                    <ul class="pagination" id="pagination-products"></ul>
+                </nav>
+            </div>
+        </section>
+
+        <%- include('layouts/footer'); %>
+
+
+            <script>
+                $(function () {
+                    totalPages = Number($("#totalPages").val());
+
+                    window.pagObj = $("#pagination-products")
+                        .twbsPagination({
+                            totalPages: totalPages,
+                            visiblePages: 3,
+                            onPageClick: function (event, page) {
+                                console.info(page + " (from options)");
+                            },
+                        })
+                        .on("page", function (event, page) {
+                            $.post("/products/pagination", { page: Number(page), message: "paginations-products" }, function (data) {
+                                $("#productTableBody").html(""); // Clear table before appending new data
+
+                                $.each(data.docs, function (index, product) {
+                                    let dateObj = new Date(product.createdAt);
+                                    let formattedDate = `${dateObj.getDate()}/${dateObj.getMonth() + 1}/${dateObj.getFullYear()}`;
+
+                                    let parentCategory = product.parent_categories && product.parent_categories.length > 0 ? product.parent_categories[0].name : "-";
+                                    let subCategory = product.sub_categories && product.sub_categories.length > 0 ? product.sub_categories[0].name : "-";
+                                    let stockStatus = product.total_stock === 0 ?
+                                        `<span class="badge rounded-pill alert-danger">Out of Stock</span>` :
+                                        `<span class="badge rounded-pill alert-success">In Stock</span>`;
+
+                                    let languages = product.languages && product.languages.length > 0 ? product.languages.join("<br>") : "N/A";
+                                    let startingIndex = (page - 1) * 7;
+                                    let row = `<tr class="align-middle text-center">
+                        <td>${startingIndex + index + 1}</td> 
+                        <td>
+                            <img src="${product.cover_image ? product.cover_image.path : 'default.jpg'}"
+                                class="img-sm img-thumbnail" alt="Product Image" width="50">
+                        </td>
+                        
+                        <td class="text-start">${product.title}</td>
+                        <td>${parentCategory}</td>
+                        <td>${subCategory}</td>
+                        <td>₹${product.assign_price}</td>
+                        <td>${product.total_stock}</td>
+                        <td>${product.is_Active}</td>
+                        <td>${stockStatus}</td>
+                        <td>${languages}</td>
+                        <td>${formattedDate}</td>
+                        <td>
+                    
+                            <a href="/products-details?id=${product._id}" class="btn btn-sm font-sm rounded btn-view">
+                                                        <i class="toggle-password eye-icon" data-target="password">&#128065;</i>
+                            </a>
+                        <a href="/products-update/edit/${product._id}" class="btn btn-sm font-sm rounded btn-brand">
+                                                        <i class="material-icons md-edit"></i>
+                            </a>
+
+                            <a onclick="deletes('${product._id}')" href="#" class="btn btn-sm font-sm btn-light rounded">
+                                                        <i style="color: red;" class="material-icons md-delete_forever"></i>
+                            </a>
+                        </td>
+                    </tr>`;
+
+                                    $("#productTableBody").append(row);
+                                });
+                            });
+                        });
+                });
+
+                (function () {
+                    let lengths = Number($("#p-length").val());
+                    for (let i = 0; i < lengths; i++) {
+                        let date = $(`.date${i}`).text();
+                        const d = new Date(date);
+                        let formattedDate = `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`;
+                        $(`.date${i}`).text(formattedDate);
+                    }
+                })();
+
+                function deletes(id) {
+                    if (id) {
+                        $.post("/products/delete", { message: "pro-delete", id: id }, function (data) {
+                            if (data === "done") {
+                                location.reload();
+                            }
+                        });
+                    }
+                }
+
+
+                function confirmDelete(productId) {
+                    if (confirm("Are you sure you want to delete this product?")) {
+                        $.post("/products/delete", { id: productId, message: "pro-delete" }, function (response) {
+                            if (response === "done") {
+                                alert("Product deleted successfully.");
+                                $(`tr[data-id='${productId}']`).remove();
+                                window.location.href = "/products"; // Redirect to products page
+
+                            } else {
+                                alert("Failed to delete product. Please try again.");
+                            }
+                        }).fail(function () {
+                            alert("Error occurred while deleting the product.");
+                        });
+                    }
+                }
+
+            </script>
+            <script>
+                $("#clearFilters").click(function () {
+                    window.location.href = window.location.pathname; // Redirects to the same page
+                });
+                $(document).ready(function () {
+                    $("#searchInput").on("keyup", function () {
+                        let query = $(this).val().trim();
+
+                        $.get("/products/search?q=" + query, function (data) {
+                            $("#productTableBody").html(""); // Clear table before adding new data
+
+                            if (data.productsData.docs.length === 0) {
+                                $("#productTableBody").html("<tr><td colspan='11' class='text-center'>No products found</td></tr>");
+                                return;
+                            }
+
+                            let page = data.productsData.page || 1;
+                            let startingIndex = (page - 1) * 7; // Adjusting index based on page number
+
+                            $.each(data.productsData.docs, function (index, product) {
+                                let dateObj = new Date(product.createdAt);
+                                let formattedDate = `${dateObj.getDate()}/${dateObj.getMonth() + 1}/${dateObj.getFullYear()}`;
+
+                                let row = `<tr>
+                        <td>${startingIndex + index + 1}</td> <!-- Index Number -->
+                        <td><img src="${product.cover_image ? product.cover_image.path : 'default.jpg'}" class="img-sm img-thumbnail" width="50"></td>
+                        <td>${product.title}</td>
+                        <td>${product.parent_categories && product.parent_categories.length > 0 ? product.parent_categories[0].name : '-'}</td>
+                        <td>${product.sub_categories && product.sub_categories.length > 0 ? product.sub_categories[0].name : '-'}</td>
+                        <td>₹${product.assign_price}</td>
+                        <td>${product.total_stock}</td>
+                        <td>
+                            ${product.stock_status === "In Stock" ?
+                                        `<span class="badge rounded-pill alert-success">In Stock</span>` :
+                                        `<span class="badge rounded-pill alert-danger">Out of Stock</span>`}
+                        </td>
+                        <td>${product.is_Active && product.is_Active.length > 0 ? product.is_Active.join('<br>') : 'N/A'}</td>
+                        <td>${product.languages && product.languages.length > 0 ? product.languages.join('<br>') : 'N/A'}</td>
+                        <td>${formattedDate}</td>
+                       <td>
+                    
+                            <a href="/products-details?id=${product._id}" class="btn btn-sm font-sm rounded btn-view">
+                                                        <i class="toggle-password eye-icon" data-target="password">&#128065;</i>
+                            </a>
+                        <a href="/products-update/edit/${product._id}" class="btn btn-sm font-sm rounded btn-view">
+                                                        <i class="material-icons md-edit"></i>
+
+                            </a>
+                            <a onclick="deletes('${product._id}')" href="#" class="btn btn-sm font-sm btn-light rounded">
+                                                        <i style="color: red;" class="material-icons md-delete_forever"></i>
+                            </a>
+                        </td>   
+                    </tr>`;
+
+                                $("#productTableBody").append(row);
+                            });
+                        });
+                    });
+                });
+            </script>
+
+
+
+            <style>
+                th {
+                    text-align: center;
+                }
+
+                .btn-view {
+                    background-color: transparent;
+                    border: none;
+                    color: #696a6b;
+                    /* Default gray color */
+                    transition: color 0.3s ease-in-out;
+                    text-decoration: none;
+                    display: inline-block;
+                }
+
+                .eye-icon {
+                    font-size: 20px;
+                    /* Adjust icon size */
+                    transition: color 0.3s ease-in-out;
+                }
+
+                .btn-view:hover .eye-icon {
+                    color: #007bff;
+                    /* Blue color on hover */
+                }
+
+                .search-container {
+                    display: flex;
+                    margin-right: 10px;
+                }
+
+                #searchInput {
+                    padding: 8px;
+                    /* border: 1px solid #3f3f3f; */
+                    border-radius: 5px;
+                }
+
+                /* Style for Subcategories to Show on Hover */
+                .dropdown-submenu {
+                    position: relative;
+                }
+
+                .dropdown-submenu:hover .subcategory-menu {
+                    display: block;
+                    position: absolute;
+                    top: 0;
+                    left: 100%;
+                    margin-top: -1px;
+                }
+
+                .subcategory-menu {
+                    display: none;
+                    min-width: 150px;
+                    background: #f8f9fa;
+                    border: 1px solid #ccc;
+                    padding: 0;
+                }
+
+                .subcategory-menu li a {
+                    padding: 8px 15px;
+                    display: block;
+                    text-decoration: none;
+                    color: #333;
+                }
+
+                .subcategory-menu li a:hover {
+                    background: #007bff;
+                    color: #fff;
+                }
+
+                .genre-dropdown-btn {
+                    background-color: #08618a;
+                    /* Blue Color */
+                    color: white;
+                    /* Text Color */
+                    border-radius: 8px;
+                    /* Rounded Corners */
+                    padding: 10px 20px;
+                    /* Button Padding */
+                    font-size: 16px;
+                    /* Font Size */
+                    font-weight: 500;
+                    /* Medium Font Weight */
+                    transition: all 0.3s ease-in-out;
+                    /* Smooth Transition */
+                }
+
+                /* Hover Effect */
+                .genre-dropdown-btn:hover {
+                    background-color: #0056b3;
+                    /* Darker Blue */
+                    color: #ffffff;
+                }
+
+                /* Focus Effect */
+                .genre-dropdown-btn:focus {
+                    box-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
+                }
+            </style>
+            <style>
+                .price-range-container {
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    flex-wrap: wrap;
+                }
+
+                .sort-btn {
+                    background-color: #28a745;
+                    color: white;
+                    border-radius: 8px;
+                    padding: 10px 20px;
+                    transition: all 0.3s ease-in-out;
+                }
+
+                .sort-btn:hover {
+                    background-color: #218838;
+                }
+
+                .clear-filters {
+                    background-color: #dc3545;
+                    color: white;
+                    border-radius: 8px;
+                    padding: 10px 15px;
+                }
+
+                .clear-filters:hover {
+                    background-color: #c82333;
+                }
+            </style>
+
+            <script>
+                $(document).ready(function () {
+                    // Handle Genre Selection
+                    $(".genre-sub").click(function (e) {
+                        e.preventDefault();
+                        let subcategoryId = $(this).data("id");
+
+                        $.get("/products/filter?subcategory=" + subcategoryId, function (data) {
+                            $("#productTableBody").html("");
+
+                            if (data.productsData.docs.length === 0) {
+                                $("#productTableBody").html("<tr><td colspan='11' class='text-center'>No products found</td></tr>");
+                                return;
+                            }
+
+                            let page = data.productsData.page || 1;
+                            let startingIndex = (page - 1) * 7;
+
+                            $.each(data.productsData.docs, function (index, product) {
+                                let dateObj = new Date(product.createdAt);
+                                let formattedDate = `${dateObj.getDate()}/${dateObj.getMonth() + 1}/${dateObj.getFullYear()}`;
+
+                                let row = `<tr>
+                        <td>${startingIndex + index + 1}</td>
+                        <td><img src="${product.cover_image ? product.cover_image.path : 'default.jpg'}" class="img-sm img-thumbnail" width="50"></td>
+                        <td>${product.title}</td>
+                        <td>${product.parent_categories && product.parent_categories.length > 0 ? product.parent_categories[0].name : '-'}</td>
+                        <td>${product.sub_categories && product.sub_categories.length > 0 ? product.sub_categories[0].name : '-'}</td>
+                        <td>₹${product.assign_price}</td>
+                        <td>${product.total_stock}</td>
+                        <td>
+                            ${product.stock_status === "In Stock" ?
+                                        `<span class="badge rounded-pill alert-success">In Stock</span>` :
+                                        `<span class="badge rounded-pill alert-danger">Out of Stock</span>`}
+                        </td>
+                        <td>${product.languages && product.languages.length > 0 ? product.languages.join('<br>') : 'N/A'}</td>
+                        <td>${formattedDate}</td>
+                        <td class="text-end">
+                           <a href="/products-details?id=${product._id}" class="btn btn-sm font-sm rounded btn-view">
+                                                        <i class="toggle-password eye-icon" data-target="password">&#128065;</i>
+                            </a>
+                        <a href="/products-update/edit/${product._id}" class="btn btn-sm font-sm rounded btn-brand">
+                                <i class="material-icons md-edit"></i>
+                            </a>
+                            <a onclick="deletes('${product._id}')" href="#" class="btn btn-sm font-sm btn-light rounded">
+                                                        <i style="color: red;" class="material-icons md-delete_forever"></i>
+                            </a>
+                        </td>
+                    </tr>`;
+
+                                $("#productTableBody").append(row);
+                            });
+                        });
+                    });
+                });
+            </script>

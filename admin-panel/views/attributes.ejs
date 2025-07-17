@@ -1,0 +1,321 @@
+<%- include('layouts/sidebar'); %>
+    <%- include('layouts/header'); %>
+        <section class="content-main">
+            <div class="content-header">
+                <div>
+                    <h2 class="content-title card-title">Attributes</h2>
+                    <p>Add, edit or delete a attributes</p>
+                </div>
+                <div class="d-flex gap-2 mb-3">
+                    <input type="text" id="searching" placeholder="Search Categories"
+                        class="form-control border" style="max-width: 400px;">
+                    <button id="clearFilters" class="btn btn-danger" style="width: 200px;">Clear Filters</button>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <form action="/attributes" method="post">
+                                <div class="mb-4">
+                                    <label for="product_name" class="form-label">Name</label>
+                                    <input name="name" type="text" placeholder="Type here" class="form-control border"
+                                        id="product_name">
+                                </div>
+                                <!-- <div class="mb-4">
+                            <label for="product_slug" class="form-label">Slug</label>
+                            <input name="slug" type="text" placeholder="Type here" class="form-control" id="product_slug">
+                        </div> -->
+                                <div class="mb-4">
+                                    <label class="form-label">Parent</label>
+                                    <select name="parent" class="form-select border">
+                                        <option value="select-parent">Select Parent</option>
+                                        <% for( let i=0; i < parent.length; i++ ) { %>
+                                            <option value="<%= parent[i]._id %>" <%=(parent[i]._id==existingParentId)
+                                                ? 'selected' : '' %>><%= parent[i].name %>
+                                            </option>
+                                            <% } %>
+
+                                    </select>
+
+                                </div>
+                                <div class="mb-4">
+                                    <label class="form-label">Description</label>
+                                    <textarea name="description" placeholder="Type here"
+                                        class="form-control border"></textarea>
+                                </div>
+                                <div class="d-grid">
+                                    <button value="addAttributes" name="submit" type="submit"
+                                        class="btn btn-primary">Create Attributes</button>
+                                </div>
+                            </form>
+                            <p class="text-warning message">
+                                <%= message %>
+                            </p>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="table-responsive">
+                                <table class="table table-hover border">
+                                    <thead>
+                                        <tr>
+                                            <!-- <th class="text-center">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" value="">
+                                                </div>
+                                            </th> -->
+                                            <th>ID</th>
+                                            <th>Name</th>
+                                            <th>Description</th>
+                                            <!-- <th>Slug</th> -->
+                                            <th>Type</th>
+                                            <th class="text-end">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% for( let i=0; i < attributesData.docs.length; i++ ) { %>
+                                            <tr>
+                                                <!-- <td class="text-center">
+                                                    <% if (attributesData.docs[i].parent !==undefined) { %>
+                                                        <i
+                                                            class="material-icons md-subdirectory_arrow_right text-muted"></i>
+                                                        <% }else{ %>
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox"
+                                                                    value="">
+                                                            </div>
+                                                            <% } %>
+                                                </td> -->
+                                                <td>
+                                                    <%= i + 1 %>
+                                                </td>
+                                                <td><b>
+                                                        <%= attributesData.docs[i].name %>
+                                                    </b></td>
+                                                <td>
+                                                    <%= attributesData.docs[i].description %>
+                                                </td>
+                                                <td>
+                                                    <% if (attributesData.docs[i].parent===undefined) { %>
+                                                        Parent
+                                                        <% }else{ %>
+                                                            <%= attributesData.docs[i].parent.name %>
+                                                                <% } %>
+                                                </td>
+                                                <td class="text-end">
+                                                    <div class="dropdown">
+                                                        <a href="#" data-bs-toggle="dropdown"
+                                                            class="btn btn-light rounded btn-sm font-sm"> <i
+                                                                class="material-icons md-more_horiz"></i> </a>
+                                                        <div class="dropdown-menu"
+                                                            style="transform: translate(-125px, 32px)!important;">
+                                                            <a class="dropdown-item"
+                                                                onclick="edit('<%= attributesData.docs[i]._id %>')"
+                                                                href="#">Edit info</a>
+                                                            <a class="dropdown-item text-danger"
+                                                                onclick="deleting('<%= attributesData.docs[i]._id %>')"
+                                                                href="#">Delete</a>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <% } %>
+                                    </tbody>
+                                    <input id="totalPages" type="text" hidden value='<%= attributesData.totalPages %>''>
+                        </table>
+
+                    </div>
+                    <div class="paginations">
+                        <nav aria-label="Page navigation example">
+                            <ul class="pagination" id="pagination-products">
+                            <li class="page-item"><a class="page-link" href="#">Previous</a></li>
+                            <li class="page-item"><a class="page-link" href="#">1</a></li>
+                            <li class="page-item"><a class="page-link" href="#">2</a></li>
+                            <li class="page-item"><a class="page-link" href="#">3</a></li>
+                            <li class="page-item"><a class="page-link" href="#">Next</a></li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div> <!-- .col// -->
+            </div> <!-- .row // -->
+        </div> <!-- card body .// -->
+    </div> <!-- card .// -->
+</section>
+<%- include('layouts/footer'); %>
+                                    <script>
+                                        setTimeout(() => {
+                                            $(".message").hide();
+                                        }, 3000);
+
+
+                                        function edit(id) {
+                                            // console.log("edit click",id);
+                                            $.post("/attributes/edit", { message: "edit-attributes", id: id }, function (data, result) {
+                                                // console.log("data is",data);
+                                                $('[name="name"]').val(data.name)
+                                                $('[name="description"]').val(data.description)
+                                                if (data.parent) {
+                                                    $(`[name="parent"]`).val(`${data.parent}`);
+                                                } else {
+                                                    $(`[name="parent"]`).val(`select-parent`);
+                                                }
+
+                                                $(`[name="submit"]`).val(id);
+                                                $(`[name="submit"]`).text("Update category");
+                                            })
+                                        }
+
+                                        function deleting(id) {
+                                            // console.log("deleting click",id);
+                                            swal({
+                                                title: "Are you sure?",
+                                                text: "Once deleted, you will not be able to recover this product file!",
+                                                icon: "warning",
+                                                buttons: true,
+                                                dangerMode: true,
+                                            }).then((willDelete) => {
+                                                if (willDelete) {
+                                                    swal("Poof! Your imaginary product has been deleted!", {
+                                                        icon: "success",
+                                                    });
+                                                    $.post(
+                                                        "/attributes/delete",
+                                                        { message: "delete-attributes", id: id },
+                                                        function (data, message) {
+                                                            //   console.log("result", data);
+                                                            if (data === "done") {
+                                                                location.reload();
+                                                            }
+                                                            //   console.log("page reloaded");
+                                                        }
+                                                    );
+                                                } else {
+                                                    swal("Your imaginary file is safe!");
+                                                }
+                                            });
+                                        }
+
+                                        $(function () {
+                                            totalPages = Number($("#totalPages").val())
+                                            window.pagObj = $("#pagination-products")
+                                                .twbsPagination({
+                                                    totalPages: totalPages,
+                                                    visiblePages: 3,
+                                                    onPageClick: function (event, page) {
+                                                        console.info(page + " (from options)");
+                                                    },
+                                                })
+                                                .on("page", function (event, page) {
+                                                    console.info(page + " (from event listening)");
+                                                    let send = { page: Number(page), message: "paginations-attributes" };
+                                                    $.post("/attributes/pagination", send, function (data) {
+                                                        // console.log(data);
+                                                        $("tbody").html("");
+                                                        jQuery.each(data.docs, function (index, data) {
+                                                            //   console.log("index is", index);
+                                                            //   console.log("index is", data);
+                                                            let td1 = ''
+                                                            let td6 = ''
+
+                                                            if (data.parent !== undefined) {
+                                                                td1 = `<i class="material-icons md-subdirectory_arrow_right text-muted"></i>`
+                                                            } else {
+                                                                td1 = ` <div class="form-check">
+                 <input class="form-check-input" type="checkbox" value="">
+                </div>`
+                                                            }
+
+                                                            if (data.parent === undefined) {
+                                                                td6 = "Parent"
+                                                            } else {
+                                                                td6 = `${data.parent.name}`
+                                                            }
+
+                                                            $("tbody").append(`<tr>
+                                        <td class="text-center">
+                                           ${td1}
+                                        </td>
+                                        <td>${index + 1}</td> 
+                                        <td><b>${data.name}</b></td>
+                                        <td>${data.description}</td>
+                                        <td>
+                                            ${td6}
+                                        </td>
+                                        <td class="text-end">
+                                            <div class="dropdown">
+                                                <a href="#" data-bs-toggle="dropdown" class="btn btn-light rounded btn-sm font-sm"> <i class="material-icons md-more_horiz"></i> </a>
+                                                <div class="dropdown-menu" style="transform: translate(-125px, 32px)!important;">
+                                                    <a class="dropdown-item" onclick="edit('${data._id}')" href="#">Edit info</a>
+                                                    <a class="dropdown-item text-danger" onclick="deleting('${data._id}')" href="#">Delete</a>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>`);
+                                                        });
+                                                    });
+                                                });
+                                        });
+
+                                        // $("#searching").on("propertychange input",function(){
+                                        $("#searching").change(function () {
+                                            // console.log("change",$("#searching").val());
+                                            let char = $("#searching").val();
+                                            if (char !== "") {
+                                                $.post("/attributes/search", { message: "search-attributes", text: char }, function (data, result) {
+                                                    // console.log("data",data);
+                                                    $("tbody").html("");
+                                                    $(".paginations").hide()
+                                                    if (data.length >= 1) {
+                                                        jQuery.each(data, function (index, data) {
+                                                            //   console.log("index is", index);
+                                                            //   console.log("index is", data);
+                                                            let td1 = ''
+                                                            let td6 = ''
+
+                                                            if (data.parent !== undefined) {
+                                                                td1 = `<i class="material-icons md-subdirectory_arrow_right text-muted"></i>`
+                                                            } else {
+                                                                td1 = ` <div class="form-check">
+                     <input class="form-check-input" type="checkbox" value="">
+                    </div>`
+                                                            }
+
+                                                            if (data.parent === undefined) {
+                                                                td6 = "Parent"
+                                                            } else {
+                                                                td6 = `${data.parent}`
+                                                            }
+
+                                                            $("tbody").append(`<tr>
+                                            <td class="text-center">
+                                               ${td1}
+                                            </td>
+                                            <td>${index + 1}</td> 
+                                            <td><b>${data.name}</b></td>
+                                            <td>${data.description}</td>
+                                            <td>
+                                                ${td6}
+                                            </td>
+                                            <td class="text-end">
+                                                <div class="dropdown">
+                                                    <a href="#" data-bs-toggle="dropdown" class="btn btn-light rounded btn-sm font-sm"> <i class="material-icons md-more_horiz"></i> </a>
+                                                    <div class="dropdown-menu" style="transform: translate(-125px, 32px)!important;">
+                                                        <a class="dropdown-item" onclick="edit('${data._id}')" href="#">Edit info</a>
+                                                        <a class="dropdown-item text-danger" onclick="deleting('${data._id}')" href="#">Delete</a>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>`);
+                                                        });
+                                                    }
+                                                })
+                                            } else {
+                                                // console.log("not ");
+                                                location.reload();
+                                            }
+                                        })
+                                    </script>
+                                    <script>
+                                        $("#clearFilters").click(function () {
+                                            window.location.href = window.location.pathname; // Redirects to the same page
+                                        });
+                                    </script>

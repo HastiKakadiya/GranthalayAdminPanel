@@ -1,0 +1,108 @@
+<!DOCTYPE HTML>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Granthalay | Admin</title>
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta property="og:title" content="">
+    <meta property="og:type" content="">
+    <meta property="og:url" content="">
+    <meta property="og:image" content="">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <!-- Favicon -->
+    <link rel="shortcut icon" type="image/x-icon" href="/assets/imgs/theme/favicon.ico">
+    <!-- Template CSS -->
+    <link href="/assets/css/main.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.ckeditor.com/4.19.0/standard/ckeditor.js"></script>
+    <script src="/assets/js/ckeditor.js"></script>
+</head>
+
+<body class="dark">
+    <div class="screen-overlay"></div>
+    <aside class="navbar-aside" id="offcanvas_aside">
+        <div class="aside-top">
+            <a href="/home" class="brand-wrap">
+                <img src="/logo/logoimage.png" style="width: 70%;" alt="Granthalay Dashboard">
+            </a>
+            <div>
+                <button class="btn btn-icon btn-aside-minimize" id="sidebarToggleBtn"> 
+                    <i class="text-muted material-icons md-menu_open" id="sidebarToggleIcon"></i>
+                </button>
+                        
+                
+            </div>
+        </div>
+        <nav>
+            <ul class="menu-aside">
+                <li class="menu-item">
+                    <a class="menu-link" href="/home"> <i class="icon material-icons md-home"></i>
+                        <span class="text">Dashboard</span>
+                    </a>
+                </li>
+                <li class="menu-item has-submenu">
+                    <a class="menu-link" href="page-products-list.html"> <i
+                            class="icon material-icons md-shopping_bag"></i>
+                        <span class="text">Collections</span>
+                    </a>
+                    <div class="submenu">
+                        <a href="/categories">Categories</a>
+                        <a href="/web-banner">App Banners </a>
+                        <a href="/coupon">Coupons </a>
+                        <a href="/products">Products</a>
+                        <a href="/shipping-charge">Shipping Charges</a>
+                        <a href="/attributes">Attributes</a>
+                     </div>
+                </li>
+                <li class="menu-item has-submenu">
+                    <a class="menu-link" href="page-orders-1.html"> <i class="icon material-icons md-shopping_cart"></i>
+                        <span class="text">Orders</span>
+                    </a>
+                    <div class="submenu">
+                        <a href="/order">Order</a>
+                   </div>
+                </li>
+                <li class="menu-item">
+                    <a class="menu-link" href="/reviews"> <i class="icon material-icons md-comment"></i>
+                        <span class="text">Reviews</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a class="menu-link" href="/customers">
+                        <i class="icon material-icons md-group"></i>
+                        <span>Users</span>
+                    </a>
+                </li>
+                <li class="menu-item has-submenu">
+                    <a class="menu-link" href="/customer-report">
+                        <i class="icon material-icons md-assessment"></i>
+                        <span class="text">Report</span>
+                    </a>
+                    <div class="submenu">
+                        <a href="/customer-report">Customer</a>
+                        <a href="/order-report">Orders </a>
+                               </div>
+                </li>
+                <br>
+                <br>
+        </nav>
+    </aside>
+
+    <script>
+        document.getElementById("sidebarToggleBtn").addEventListener("click", function () {
+            const icon = document.getElementById("sidebarToggleIcon");
+            // Toggle between md-menu_open and md-menu
+            if (icon.classList.contains("md-menu_open")) {
+                icon.classList.remove("md-menu_open");
+                icon.classList.add("md-menu");
+            } else {
+                icon.classList.remove("md-menu");
+                icon.classList.add("md-menu_open");
+            }
+        });
+    </script>
+    
+    

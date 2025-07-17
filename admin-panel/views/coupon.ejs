@@ -1,0 +1,343 @@
+<%- include('layouts/sidebar'); %>
+<%- include('layouts/header'); %>
+<section class="content-main">
+    <div class="content-header">
+        <div>
+            <h2 class="content-title card-title">Coupon</h2>
+            <p>Add, edit or delete a coupon</p>
+        </div>
+        <div class="d-flex gap-2 mb-3">
+            <input type="text" id="searching" placeholder="Search Categories" class="form-control border" style="max-width: 400px;">
+            <button id="clearFilters" class="btn btn-danger" style="width: 200px;">Clear Filters</button>
+          </div>
+    </div>
+    <div class="card">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3">
+                    <form action="/coupon" method="post">
+                        <div class="mb-4">
+                            <label  class="form-label">Coupon Name</label>
+                            <input name="name" type="text" placeholder="Type here" class="form-control border" id="product_name">
+                        </div>
+                        <div class="mb-4">
+                            <label  class="form-label">Number</label>
+                            <input name="number" type="number" placeholder="Type here" class="form-control border" id="product_name">
+                        </div>
+                            <div class="mb-4">
+                                <label class="form-label">Type</label>
+                                <select name="type" class="form-select">
+                                    <option value="rupees">Rupees</option>
+                                    <option value="percentage">Percentage</option>
+                                </select>
+                            </div>
+                        <div class="mb-4">
+                            <label class="form-label">Start Date</label>
+                            <input name="startDate" type="date" class="form-control date border" id="startDate">
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label">End Date</label>
+                            <input name="endDate" type="date" class="form-control date border" id="endDate">
+                        </div>
+                        <div class="d-grid">
+                            <button value="addCoupons" name="submit" type="submit" class="btn btn-primary">Create Coupons</button>
+                        </div>
+                    </form>
+                    <p class="text-warning message"><%= message %></p>
+                </div>
+                <div class="col-md-9">
+                    <div class="table-responsive">
+                        <table class="table table-hover border">
+                            <thead class="border">
+                                <tr>
+                                    <!-- <th class="text-center">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="">
+                                        </div>
+                                    </th> -->
+                                    <th>No</th>
+                                    <th>Name</th>
+                                    <th>Number</th>
+                                    <th>Type</th>
+                                    <th>Start Date</th>
+                                    <th>End Date</th>
+                                    <th class="text-end">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <input type="text" id="p-length" hidden value="<%= couponsData.docs.length %>">
+                                <% for( let i = 0; i < couponsData.docs.length; i++ ) { %>
+                                    <tr>
+                                        <!-- <td class="text-center">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="">
+                                            </div>
+                                        </td> -->
+                                        <td><%= i + 1 %></td>
+                                        <td><b><%= couponsData.docs[i].name %></b></td>
+                                        <td><%= couponsData.docs[i].number %></td>
+                                        <td>
+                                                    <%= couponsData.docs[i].type %>
+                                        </td>
+                                        <td id="start<%= i %>">
+                                                    <%= couponsData.docs[i].start %>
+                                        </td>
+                                        <td id="end<%= i %>">
+                                                    <%= couponsData.docs[i].end %>
+                                        </td>
+                                        <td class="text-end">
+                                            <div class="dropdown">
+                                                <a href="#" data-bs-toggle="dropdown" class="btn btn-light rounded btn-sm font-sm"> <i class="material-icons md-more_horiz"></i> </a>
+                                                <div class="dropdown-menu" style="transform: translate(-125px, 32px)!important;">
+                                                    <a class="dropdown-item" onclick="edit('<%= couponsData.docs[i]._id %>')" href="#">Edit info</a>
+                                                    <a class="dropdown-item text-danger" onclick="deleting('<%= couponsData.docs[i]._id %>')" href="#">Delete</a>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <% } %>
+                            </tbody>
+                            <input id="totalPages" type="text" hidden value='<%= couponsData.totalPages %>''>
+                        </table>
+
+                    </div>
+                    <div class="paginations">
+                        <nav aria-label="Page navigation example">
+                            <ul class="pagination" id="pagination-products">
+                            <li class="page-item"><a class="page-link" href="#">Previous</a></li>
+                            <li class="page-item"><a class="page-link" href="#">1</a></li>
+                            <li class="page-item"><a class="page-link" href="#">2</a></li>
+                            <li class="page-item"><a class="page-link" href="#">3</a></li>
+                            <li class="page-item"><a class="page-link" href="#">Next</a></li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div> <!-- .col// -->
+            </div> <!-- .row // -->
+        </div> <!-- card body .// -->
+    </div> <!-- card .// -->
+</section>
+<%- include('layouts/footer'); %>
+<script>
+    setTimeout(() => {
+        $(".message").hide();
+    }, 3000);
+
+    (function (){
+        let lengths = Number($("#p-length").val());
+        for(let i = 0; i < lengths; i++){
+            let start = $(`#start${i}`).text()            
+            let end = $(`#end${i}`).text()            
+            const startDate = new Date(start);
+            const endDate = new Date(end);
+            let mongth1 = startDate.getMonth() + 1
+            let mongth2 = endDate.getMonth() + 1
+            $(`#start${i}`).text(startDate.getDate() + "/" + mongth1  + "/" + startDate.getFullYear())
+            $(`#end${i}`).text(endDate.getDate() + "/" + mongth2 + "/" + endDate.getFullYear())
+        }
+    })();
+
+    function edit(id){
+        // console.log("edit click",id);
+        $.post("/coupon/edit",{message : "edit-coupon", id : id }, function ( data, result ) {
+            // console.log("data is",data);
+            $('[name="name"]').val(data.name)
+            $('[name="number"]').val(data.number)
+            $(`[name="type"]`).val(`${data.type}`);
+            let startDate = new Date(data.start);
+            let endDate = new Date(data.end);
+            let month1, date1;
+            let month2, date2;
+            let realMonth1 = startDate.getMonth() + 1;
+            realMonth1 < 10 ? month1 = "0" + realMonth1 : month1 = realMonth1;
+            startDate.getDate() < 10 ? date1 = "0" + startDate.getDate() : date1 = startDate.getDate();
+
+            let realMonth2 = endDate.getMonth() + 1
+            realMonth2 < 10 ? month2 = "0" + realMonth2 : month2 = realMonth2;
+            endDate.getDate() < 10 ? date2 = "0" + endDate.getDate() : date2 = endDate.getDate();
+
+            let start = startDate.getFullYear()  + "-" + month1 + "-" + date1;
+            let end = endDate.getFullYear()  + "-" + month2 + "-" + date2;
+            // console.log("start date is:",start);
+            // console.log("start date is:",end);
+            $(`[name="startDate"]`).val(`${start}`);
+            $(`[name="endDate"]`).val(`${end}`);
+            $(`[name="submit"]`).val(id);
+            $(`[name="submit"]`).text("Update Coupon");
+        })
+    }
+
+    function deleting(id){
+        // console.log("deleting click",id);
+        swal({
+    title: "Are you sure?",
+    text: "Once deleted, you will not be able to recover this product file!",
+    icon: "warning",
+    buttons: true,
+    dangerMode: true,
+  }).then((willDelete) => {
+    if (willDelete) {
+      swal("Poof! Your imaginary product has been deleted!", {
+        icon: "success",
+      });
+      $.post(
+        "/coupon/delete",
+        { message: "delete-coupon", id: id },
+        function (data, message) {
+        //   console.log("result", data);
+          if(data === "done"){
+              location.reload();
+          }
+        //   console.log("page reloaded");
+        }
+      );
+    } else {
+      swal("Your imaginary file is safe!");
+    }
+  });
+    }
+
+$(function () {
+    totalPages = Number($("#totalPages").val())
+  window.pagObj = $("#pagination-products")
+    .twbsPagination({
+      totalPages: totalPages,
+      visiblePages: 3,
+      onPageClick: function (event, page) {
+        console.info(page + " (from options)");
+      },
+    })
+    .on("page", function (event, page) {
+      console.info(page + " (from event listening)");
+      let send = { page: Number(page), message: "paginations-coupons" };
+      $.post("/coupon/pagination", send, function (data) {
+        // console.log(data);
+        $("tbody").html("");
+        jQuery.each(data.docs, function (index, data) {
+        //   console.log("index is", index);
+        //   console.log("index is", data);
+          const startDate = new Date(data.start);
+            const endDate = new Date(data.end);
+            let month1 = startDate.getMonth() + 1;
+            let month2 = endDate.getMonth() + 1;
+            let start = startDate.getDate() + "/" + month1 + "/" + startDate.getFullYear();
+            let end = endDate.getDate() + "/" + month2 + "/" + endDate.getFullYear();
+            
+          $("tbody").append(`<tr>
+                                        <td class="text-center">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="">
+                                            </div>
+                                        </td>
+                                        <td>${index + 1}</td> 
+                                        <td><b>${data.name}</b></td>
+                                        <td>${data.number}</td>
+                                        <td>
+                                            ${data.type}
+                                        </td>
+                                        <td>
+                                            ${start}
+                                        </td>
+                                        <td>
+                                            ${end}
+                                        </td>
+                                        <td class="text-end">
+                                            <div class="dropdown">
+                                                <a href="#" data-bs-toggle="dropdown" class="btn btn-light rounded btn-sm font-sm"> <i class="material-icons md-more_horiz"></i> </a>
+                                                <div class="dropdown-menu" style="transform: translate(-125px, 32px)!important;">
+                                                    <a class="dropdown-item" onclick="edit('${data._id}')" href="#">Edit info</a>
+                                                    <a class="dropdown-item text-danger" onclick="deleting('${data._id}')" href="#">Delete</a>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>`);
+        });
+      });
+    });
+});
+
+// $("#searching").on("propertychange input",function(){
+$("#searching").change(function(){
+    // console.log("change",$("#searching").val());
+    let char = $("#searching").val();
+    if(char !== ""){
+        $.post("/coupon/search",{message: "search-coupon", text : char},function(data,result){
+            // console.log("data",data);
+            $("tbody").html("");
+            $(".paginations").hide()
+            if(data.length >= 1){
+                jQuery.each(data, function (index, data) {
+            //   console.log("index is", index);
+            //   console.log("index is", data); 
+              const startDate = new Date(data.start);
+            const endDate = new Date(data.end);
+            let month1 = startDate.getMonth() + 1;
+            let month2 = endDate.getMonth() + 1;
+            let start = startDate.getDate() + "/" + month1 + "/" + startDate.getFullYear();
+            let end = endDate.getDate() + "/" + month2 + "/" + endDate.getFullYear();
+            
+              $("tbody").append(`<tr>
+                                            <td class="text-center">
+                                                <div class="form-check">
+                                                 <input class="form-check-input" type="checkbox" value="">
+                                                </div>
+                                            </td>
+                                            <td>${index + 1}</td> 
+                                            <td><b>${data.name}</b></td>
+                                            <td>${data.number}</td>
+                                            <td>
+                                                ${data.type}
+                                            </td>
+                                            <td>
+                                                ${start}
+                                            </td>
+                                            <td>
+                                                ${end}
+                                            </td>
+                                            <td class="text-end">
+                                                <div class="dropdown">
+                                                    <a href="#" data-bs-toggle="dropdown" class="btn btn-light rounded btn-sm font-sm"> <i class="material-icons md-more_horiz"></i> </a>
+                                                    <div class="dropdown-menu" style="transform: translate(-125px, 32px)!important;">
+                                                        <a class="dropdown-item" onclick="edit('${data._id}')" href="#">Edit info</a>
+                                                        <a class="dropdown-item text-danger" onclick="deleting('${data._id}')" href="#">Delete</a>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>`);
+            });
+            }
+        })
+    }else{
+                // console.log("not ");
+                location.reload();
+            }
+})
+</script>
+
+<script>
+     $("#clearFilters").click(function () {
+                                            window.location.href = window.location.pathname; // Redirects to the same page
+                                        });
+</script>
+
+<script>
+    document.querySelector('form').addEventListener('submit', function (e) {
+        const startDateInput = document.querySelector('[name="startDate"]');
+        const endDateInput = document.querySelector('[name="endDate"]');
+
+        const startDate = new Date(startDateInput.value);
+        const endDate = new Date(endDateInput.value);
+
+        if (startDateInput.value && endDateInput.value && endDate < startDate) {
+            e.preventDefault(); // Stop form submission
+            alert("❌ End Date cannot be before Start Date.");
+            endDateInput.focus();
+        }
+    });
+
+    document.querySelector('[name="startDate"]').addEventListener('change', function () {
+    const endDateInput = document.querySelector('[name="endDate"]');
+    endDateInput.min = this.value;
+});
+
+</script>

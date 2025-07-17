@@ -1,0 +1,176 @@
+<%- include('layouts/sidebar'); %>
+    <%- include('layouts/header'); %>
+        <section class="content-main">
+            <div class="content-header">
+                <div>
+                    <h2 class="content-title card-title">App Banners</h2>
+                    <p>Add, edit or delete a web banner</p>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <form action="/web-banner" method="post" enctype="multipart/form-data">
+                                <div class="mb-4">
+                                    <label for="formFile" class="form-label">Upload Banner</label>
+                                    <img id="webImageId" name="image" src="" height="260" style="max-width:329px;">
+                                    <input onchange="imgPreWeb(event)" class="form-control border" name="banner"
+                                        type="file" id="formFile" accept="image/*">
+                                </div>
+                                <div class="d-grid">
+                                    <button value="addWebBanner" name="submit" type="submit"
+                                        class="btn btn-primary">Create banner</button>
+                                </div>
+                            </form>
+                            <p class="text-warning message">
+                                <%= message %>
+                            </p>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="table-responsive">
+                                <table class="table table-hover border">
+                                    <thead class="border">
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Name</th>
+                                            <!-- <th>Position</th> -->
+                                            <th class="text-end">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% for( let i=0; i < webBannerData.docs.length; i++ ) { %>
+                                            <tr>
+                                                <td>
+                                                    <%= i + 1 %>
+                                                </td>
+                                                <td>
+                                                    <div class="product-box">
+                                                        <img src="<%= webBannerData.docs[i].path %>" alt="">
+                                                    </div>
+                                                </td>
+                                                <!-- <td><%= webBannerData.docs[i].position %></td> -->
+                                                <td class="text-end">
+                                                    <div class="dropdown">
+                                                        <a href="#" data-bs-toggle="dropdown"
+                                                            class="btn btn-light rounded btn-sm font-sm"> <i
+                                                                class="material-icons md-more_horiz"></i> </a>
+                                                        <div class="dropdown-menu"
+                                                            style="transform: translate(-125px, 32px)!important;">
+                                                            <a class="dropdown-item"
+                                                                onclick="edit('<%= webBannerData.docs[i]._id %>')"
+                                                                href="#">Edit info</a>
+                                                            <a class="dropdown-item text-danger"
+                                                                onclick="deleting('<%= webBannerData.docs[i]._id %>')"
+                                                                href="#">Delete</a>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <% } %>
+                                    </tbody>
+                                    <input id="totalPages" type="text" hidden value='<%= webBannerData.totalPages %>''>
+                        </table>
+
+                    </div>
+                    <div class="paginations">
+                        <nav aria-label="Page navigation example">
+                            <ul class="pagination" id="pagination-products">
+                            <li class="page-item"><a class="page-link" href="#">Previous</a></li>
+                            <li class="page-item"><a class="page-link" href="#">1</a></li>
+                            <li class="page-item"><a class="page-link" href="#">2</a></li>
+                            <li class="page-item"><a class="page-link" href="#">3</a></li>
+                            <li class="page-item"><a class="page-link" href="#">Next</a></li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div> <!-- .col// -->
+            </div> <!-- .row // -->
+        </div> <!-- card body .// -->
+    </div> <!-- card .// -->
+</section>
+        <%- include('layouts/footer'); %>
+                                    <script>
+                                        setTimeout(() => {
+                                            $(".message").hide();
+                                        }, 3000);
+
+                                        function edit(id) {
+                                            // console.log("edit click",id);
+                                            $.post("/web-banner/edit", { message: "edit-web-banner", id: id }, function (data, result) {
+                                                // console.log("data is",data);
+                                                $('[name="position"]').val(data.position)
+                                                let webImageId = document.getElementById("webImageId");
+                                                webImageId.src = data.path;
+                                                $(`[name="submit"]`).val(id);
+                                                $(`[name="submit"]`).text("Update banner");
+                                            })
+                                        }
+
+                                        function deleting(id) {
+                                            // console.log("deleting click",id);
+                                            swal({
+                                                title: "Are you sure?",
+                                                text: "Once deleted, you will not be able to recover this product file!",
+                                                icon: "warning",
+                                                buttons: true,
+                                                dangerMode: true,
+                                            }).then((willDelete) => {
+                                                if (willDelete) {
+                                                    swal("Poof! Your imaginary product has been deleted!", {
+                                                        icon: "success",
+                                                    });
+                                                    $.post(
+                                                        "/web-banner/delete",
+                                                        { message: "delete-web-banner", id: id },
+                                                        function (data, message) {
+                                                            //   console.log("result", data);
+                                                            if (data === "done") {
+                                                                location.reload();
+                                                            }
+                                                            //   console.log("page reloaded");
+                                                        }
+                                                    );
+                                                } else {
+                                                    swal("Your imaginary file is safe!");
+                                                }
+                                            });
+                                        }
+
+                                        $(function () {
+                                            totalPages = Number($("#totalPages").val())
+                                            window.pagObj = $("#pagination-products")
+                                                .twbsPagination({
+                                                    totalPages: totalPages,
+                                                    visiblePages: 3,
+                                                    onPageClick: function (event, page) {
+                                                        console.info(page + " (from options)");
+                                                    },
+                                                })
+                                                .on("page", function (event, page) {
+                                                    console.info(page + " (from event listening)");
+                                                    let send = { page: Number(page), message: "paginations-web-banner" };
+                                                    $.post("/web-banner/pagination", send, function (data) {
+                                                        // console.log(data);
+                                                        $("tbody").html("");
+                                                        jQuery.each(data.docs, function (index, data) {
+                                                            //   console.log("index is", index);
+                                                            //   console.log("index is", data);
+                                                            $("tbody").append(`<tr> <td>${index + 1}</td> <td> <div class="product-box"> <img src="${data.path}" alt=""> </div></td> 
+            <td class="text-end"> <div class="dropdown"> <a href="#" data-bs-toggle="dropdown" class="btn btn-light rounded btn-sm font-sm"> <i class="material-icons md-more_horiz"></i> </a> <div class="dropdown-menu" style="transform: translate(-125px, 32px)!important;"> <a class="dropdown-item" onclick="edit('${data._id}')" href="#">Edit info</a> <a class="dropdown-item text-danger" onclick="deleting('${data._id}')" href="#">Delete</a> </div> </div> </td> </tr>`);
+                                                        });
+                                                    });
+                                                });
+                                        });
+
+                                        function imgPreWeb(event) {
+                                            let webImageId = document.getElementById("webImageId");
+                                            webImageId.src = URL.createObjectURL(event.target.files[0]);
+                                            webImageId.alt = "app slider";
+                                            $("#webImageId").addClass("rounded border p-2 m-2");
+                                            webImageId.onload = function () {
+                                                URL.revokeObjectURL(webImageId.src);
+                                            };
+                                        }
+
+                                    </script>

@@ -1,0 +1,608 @@
+<style>
+    .gradient-text-orange {
+        background: linear-gradient(to right, #ff7e5f, #feb47b);
+        /* Gradient colors */
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        display: inline-block;
+    }
+
+    .gradient-text-blue {
+        background: linear-gradient(to right, #3391fd, #ae7ae9);
+        /* Gradient colors */
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        display: inline-block;
+    }
+
+    .gradient-text-pink {
+        background: linear-gradient(to right, #fc7ed6, #c3ffa7);
+        /* Gradient colors */
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        display: inline-block;
+    }
+</style>
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+<style>
+    .btn-animated-report {
+        background: linear-gradient(to right, #6a11cb, #2575fc);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-animated-report:hover {
+        background: linear-gradient(to right, #2575fc, #6a11cb);
+        transform: translateY(-2px);
+    }
+
+    .btn-animated-report svg {
+        transition: transform 0.3s ease;
+    }
+
+    .btn-animated-report:hover svg {
+        transform: translateX(5px);
+    }
+</style>
+
+
+
+<!-- BACKGROUND COLOR : #2f3446 rgb(47, 52, 70)  hsl(227, 20%, 23%) -->
+
+<%- include('layouts/sidebar'); %>
+    <%- include('layouts/header'); %>
+
+        <section class="content-main">
+            <div class="content-header">
+                <div style="width: 100%">
+                    <h2 class="gradient-text-blue">Welcome, <%= adminName %>!</h2><br>
+                    <p class="gradient-text-pink">Whole data about your business here</p>
+
+                    <div style="display: flex; justify-content: center; width: 100%">
+                        <h1 class="content-title card-title gradient-text-orange">Dashboard <%= currentYear %>
+                        </h1>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-4">
+                    <div class="card card-body mb-4" style="position: relative;" onclick="openChartModal('order-charts', 'Orders')">
+                        <article class="icontext" 
+                            style="cursor: pointer;">
+                            <!-- Ensure the span has proper centering and size -->
+                            <span
+                                class="icon icon-sm rounded-circle bg-success-light flex items-center justify-center w-16 h-16">
+                                <i class="text-success material-icons md-local_shipping text-4xl"
+                                    style="margin-top: 12px;margin-left: 2px;"></i> <!-- Adjust icon size -->
+                            </span>
+                            <div class="text">
+                                <h6 class="mb-1">Total Orders</h6>
+                                <span>
+                                    <%= orderData.reduce((acc, num)=> acc + num, 0) %>
+                                </span>
+                            </div>
+                        </article>
+                        <canvas id="order-charts" style="margin-top: 10px;"></canvas>
+
+                        <!-- View Report Button -->
+                        <div class="d-flex justify-content-end mt-3">
+                            <a href="/order-report" class="btn btn-sm btn-outline-primary" onclick="event.stopPropagation()">View Report >>></a>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="col-lg-4">
+                    <div class="card card-body mb-4" style="position: relative;" onclick="openChartModal('customer-charts', 'Customers')">
+                        <article class="icontext" 
+                            style="cursor: pointer;">
+                            <span class="icon icon-sm rounded-circle bg-success-light flex items-center justify-center">
+                                <i class="text-success material-icons md-person"
+                                    style="margin-top: 12px;margin-left: 2px;"></i>
+                            </span>
+                            <div class="text">
+                                <h6 class="mb-1">Total Customers</h6>
+                                <span>
+                                    <%= customerData.reduce((acc, num)=> acc + num, 0) %>
+                                </span>
+                            </div>
+                        </article>
+                        <canvas id="customer-charts" style="margin-top: 10px;"></canvas>
+
+                        <!-- View Report Button -->
+                        <div class="d-flex justify-content-end mt-3">
+                            <a href="/customer-report" class="btn btn-sm btn-outline-primary" onclick="event.stopPropagation()">View Report >>></a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Total Products -->
+                <div class="col-lg-4">
+                    <div class="card card-body mb-4" onclick="openChartModal('product-charts', 'Products')">
+                        <article class="icontext">
+                            <span class="icon icon-sm rounded-circle bg-warning-light flex items-center justify-center">
+                                <i class="text-warning material-icons md-qr_code"
+                                    style="margin-top: 12px;margin-left: 2px;"></i>
+                            </span>
+                            <div class="text">
+                                <h6 class="mb-1 card-title">Total Products</h6>
+                                <span>
+                                    <%= productData.reduce((acc, num)=> acc + num, 0) %>
+                                </span>
+                            </div>
+                        </article>
+                        <canvas id="product-charts"></canvas>
+                    </div>
+                </div>
+
+                <!-- Total Reviews -->
+                <div class="col-lg-4">
+                    <div class="card card-body mb-4" onclick="openChartModal('review-charts', 'Reviews')">
+                        <article class="icontext">
+                            <span class="icon icon-sm rounded-circle bg-warning-light flex items-center justify-center">
+                                <i class="text-warning material-icons md-star"
+                                    style="margin-top: 12px;margin-left: 2px;"></i>
+                            </span>
+                            <div class="text">
+                                <h6 class="mb-1 card-title">Total Reviews</h6>
+                                <span>
+                                    <%= reviewData.reduce((acc, num)=> acc + num, 0) %>
+                                </span>
+                            </div>
+                        </article>
+                        <canvas id="review-charts"></canvas>
+                    </div>
+                </div>
+
+                <!-- Total Categories (NEWLY ADDED) -->
+                <div class="col-lg-4">
+                    <div class="card card-body mb-4" onclick="openChartModal('category-charts', 'Categories')">
+                        <article class="icontext">
+                            <span class="icon icon-sm rounded-circle bg-primary-light flex items-center justify-center">
+                                <i class="text-primary material-icons md-category"
+                                    style="margin-top: 12px;margin-left: 2px;"></i>
+                            </span>
+                            <div class="text">
+                                <h6 class="mb-1 card-title">Total Categories</h6>
+                                <span>
+                                    <%= categoryData.reduce((acc, num)=> acc + num, 0) %>
+                                </span>
+                            </div>
+                        </article>
+                        <canvas id="category-charts"></canvas>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- Modal for Enlarged Chart -->
+            <div class="modal fade" id="chartModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="chartModalTitle"></h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <canvas id="modalChartCanvas"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="dashboard-summary">
+
+                <div class="summary-card"
+                    style="background: linear-gradient(135deg, #f7971e, #ffd200); color: #1a1a1a;">
+                    <h4>Total Revenue (₹)</h4>
+                    <h4>₹ <%= totalRevenue || 0 %>
+                    </h4>
+                </div>
+
+                <div class="summary-card" style="background: linear-gradient(135deg, #43cea2, #185a9d); color: #fff;">
+                    <h4>Pending Orders</h4>
+                    <h4>
+                        <%= pendingOrders || 0 %>
+                    </h4>
+                </div>
+
+                <div class="summary-card" style="background: linear-gradient(135deg, #ff416c, #ff4b2b); color: #fff;">
+                    <h4>Cancelled Orders</h4>
+                    <h4>
+                        <%= cancelledOrders || 0 %>
+                    </h4>
+                </div>
+
+                <div class="summary-card" style="background: linear-gradient(135deg, #7f00ff, #e100ff); color: #fff;">
+                    <h4>Active Products</h4>
+                    <h4>
+                        <%= activeProducts || 0 %>
+                    </h4>
+                </div>
+
+            </div>
+
+
+            <div style="display: flex; flex-wrap: wrap; gap: 20px; margin-top: 20px;">
+
+                <!-- Low Stock Products -->
+                <div class="dashboard-card"
+                    style="background: linear-gradient(135deg, #c03c1b, #e7a680, #e72626); color: #ffffff;">
+                    <h3 class="mb-3" style="margin-left: 20px;">Low Stock Products</h3>
+
+                    <div class="left-align-list">
+                        <ul class="list-unstyled">
+                            <% lowStockProducts.slice(0, 5).forEach((product, index) => { %>
+                                <li class="mb-2">
+                                    <h5 class="fw-bold">
+                                        <strong><%= index + 1 %>.</strong>
+                                        <%= product.title %>
+                                    </h5>
+                                    <h6>Stock: <strong><%= product.total_stock %></strong></h6>
+                                </li>
+                            <% }) %>
+                        </ul>
+                    
+                        <% if (lowStockProducts.length > 5) { %>
+                            <a href="/products?filter=lowStock" class="btn btn-outline-dark btn-sm mt-2" style="margin-left: 20px;">
+                                View All Low Stock Products
+                            </a>
+                        <% } %>
+                    </div>
+                    
+                </div>
+
+                <!-- Recently Added Products -->
+                <div class="dashboard-card"
+                    style="background: linear-gradient(135deg, #9be9bb, #3e8f5f, #034420); color: #ffffff;">
+                    <h3 class="mb-3" style="margin-left: 20px;">Recently Added Products</h3>
+
+                    <div class="left-align-list">
+                        <ul class="list-unstyled">
+                            <% recentProducts.forEach(p=> { %>
+                                <li>
+                                    <h5>
+                                        <%= p.name %> - <%= p.createdAt.toDateString() %>
+                                    </h5>
+                                </li>
+                                <% }) %>
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+
+
+
+
+
+            <section class="dashboard-charts p-6 bg-gray-100" style="margin-top: 20px;">
+                <h2 class="text-2xl font-bold mb-4" style="margin-bottom: 30px;">📊 Dashboard Insights</h2>
+                <!-- Grid Container -->
+
+                <!-- <table style="width: 100%;" class="bg-primary-light"> -->
+                <table style="width: 100%;">
+                    <tr>
+                        <td>
+                            <!-- Order Status Pie Chart -->
+                            <!-- <div class="bg-gray-800 text-gray-100 dark:bg-gray-800 dark:text-gray-100 p-4 rounded-2xl shadow-md transition-all duration-300"> -->
+                            <h4 class="text-lg font-semibold mb-2" style="margin: 50px;">📦 Order Status Distribution</h4>
+                            <canvas id="orderStatusChart" height="120" style="margin-top: 50px"></canvas>
+                            <!-- </div> -->
+                        </td>
+                        <td style="width: 54.5%;">
+
+                            <!-- Revenue by Category -->
+                            <!-- <div class="bg-gray-800 text-gray-100 dark:bg-gray-800 dark:text-gray-100 p-4 rounded-2xl shadow-md transition-all duration-300"
+            style="height: 100%;width: 100%;"> -->
+                            <h4 class="text-lg font-semibold mb-2" style="margin: 50px;">🏷️ Revenue by Category</h4>
+                            <canvas id="revenueCategoryChart" height="250" style="margin-top: 50px;"></canvas>
+                            <!-- </div> -->
+                        </td>
+
+
+                    </tr>
+
+                </table>
+                <!-- <table style="width: 100%; padding: 20px;" class="bg-primary-light"> -->
+                <table style="width: 100%; padding: 20px; margin: 30px;">
+                    <tr>
+                        <td style="width: 50%;padding-left: 20px;">
+
+                            <!-- Top Selling Products -->
+                            <h4 class="text-lg font-semibold mb-2" style="margin: 50px;">🔥 Top Selling Products</h4>
+                            <canvas id="topProductsChart" height="100" style="margin: 40px;"></canvas>
+
+                        </td>
+                    </tr>
+                </table>
+            </section>
+
+        </section>
+
+        <%- include('layouts/footer'); %>
+
+
+           <style>
+                .dashboard-card {
+                    border-radius: 20px;
+                    padding: 20px;
+                    flex: 1 1 48%;
+                    transition: transform 0.3s ease, box-shadow 0.3s ease;
+                    cursor: pointer;
+                }
+
+                .dashboard-card:hover {
+                    transform: scale(1.03);
+                    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.25);
+                    z-index: 1;
+                }
+
+                .dashboard-summary {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 20px;
+                    margin-top: 20px;
+                }
+
+                .summary-card {
+                    flex: 1 1 250px;
+                    min-height: 120px;
+                    max-height: 180px;
+                    padding: 15px;
+                    border-radius: 14px;
+                    text-align: center;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                    align-items: center;
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                    transition: transform 0.2s ease;
+                }
+
+                .summary-card:hover {
+                    transform: translateY(-5px);
+                }
+
+                .summary-card h4 {
+                    margin: 5px 0;
+                    font-size: 1rem;
+                }
+
+                .summary-card ul {
+                    list-style-type: none;
+                    padding: 0;
+                    margin: 0;
+                }
+
+                .summary-card li h4 {
+                    font-size: 0.9rem;
+                    font-weight: normal;
+                }
+            </style>
+
+
+            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    // Data Initialization
+                    const months = <%- JSON.stringify(months) %>;
+                    const orderData = <%- JSON.stringify(orderData) %>;
+                    const customerData = <%- JSON.stringify(customerData) %>;
+                    const productData = <%- JSON.stringify(productData) %>;
+                    const reviewData = <%- JSON.stringify(reviewData) %>;
+                    const categoryData = <%- JSON.stringify(categoryData) %>;
+
+                    let chartInstances = {}; // Store chart instances
+
+                    function createChart(ctx, label, data, color) {
+                        return new Chart(ctx, {
+                            type: 'line',
+                            data: {
+                                labels: months,
+                                datasets: [{
+                                    label: label,
+                                    data: data,
+                                    fill: false,
+                                    borderColor: color,
+                                    tension: 0.1
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                scales: {
+                                    y: { beginAtZero: true }
+                                }
+                            }
+                        });
+                    }
+
+                    // Create initial charts
+                    chartInstances['order-charts'] = createChart(document.getElementById('order-charts'), 'Orders', orderData, 'rgba(54, 162, 235, 1)');
+                    chartInstances['customer-charts'] = createChart(document.getElementById('customer-charts'), 'Customers', customerData, 'rgba(75, 192, 192, 1)');
+                    chartInstances['product-charts'] = createChart(document.getElementById('product-charts'), 'Products', productData, 'rgba(153, 102, 255, 1)');
+                    chartInstances['review-charts'] = createChart(document.getElementById('review-charts'), 'Reviews', reviewData, 'rgba(255, 159, 64, 1)');
+                    chartInstances['category-charts'] = createChart(document.getElementById('category-charts'), 'Categories', categoryData, 'rgba(255, 99, 132, 1)');
+
+                    // Function to Open Modal and Show Enlarged Chart
+                    let modalChart;
+                    function openChartModal(chartId, title) {
+                        document.getElementById('chartModalTitle').textContent = title;
+
+                        // Destroy existing modal chart instance if exists
+                        if (modalChart) {
+                            modalChart.destroy();
+                        }
+
+                        // Clone the data from the existing chart
+                        const clonedData = chartInstances[chartId].data.datasets[0].data;
+                        const clonedColor = chartInstances[chartId].data.datasets[0].borderColor;
+
+                        // Create a new chart in the modal
+                        modalChart = createChart(document.getElementById('modalChartCanvas'), title, clonedData, clonedColor);
+
+                        // Show modal
+                        new bootstrap.Modal(document.getElementById('chartModal')).show();
+                    }
+
+                    // Attach function to global scope
+                    window.openChartModal = openChartModal;
+                });
+            </script>
+            <script>
+                // Clear history when reaching the home page
+                history.pushState(null, null, location.href);
+                window.addEventListener("popstate", function () {
+                    history.pushState(null, null, location.href);
+                });
+            </script>
+
+
+
+
+
+            <script>
+                const orderStatusPieData = <%- JSON.stringify(orderStatusPie || []) %>;
+                const revenueByCategoryData = <%- JSON.stringify(revenueByCategory || []) %>;
+                const topSellingProductsData = <%- JSON.stringify(topSellingProducts || []) %>;
+
+                function getThemeFontColor() {
+                    return 'white'; // Replace this with any color you prefer
+                }
+
+                function getFontStyle() {
+                    return {
+                        size: 15,       // Font size
+                        // weight: 'bold', // Make the font bold
+                    };
+                }
+
+                function buildCharts() {
+                    const fontColor = getThemeFontColor();
+                    const fontStyle = getFontStyle();
+
+                    // 📦 Order Status Pie
+                    new Chart(document.getElementById("orderStatusChart"), {
+                        type: "pie",
+                        data: {
+                            labels: orderStatusPieData.map(e => e._id),
+                            datasets: [{
+                                data: orderStatusPieData.map(e => e.count),
+                                backgroundColor: ["#34d399", "#60a5fa", "#f87171", "#fbbf24", "#a78bfa"]
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            animation: { duration: 1000, easing: "easeOutBounce" },
+                            plugins: {
+                                legend: {
+                                    labels: {
+                                        color: fontColor,
+                                        font: fontStyle
+                                    }
+                                }
+                            }
+                        }
+                    });
+
+                    // 🏷️ Revenue by Category (Bar)
+                    new Chart(document.getElementById("revenueCategoryChart"), {
+                        type: "bar",
+                        data: {
+                            labels: revenueByCategoryData.map(e => e._id || "Uncategorized"),
+                            datasets: [{
+                                label: "Revenue ₹",
+                                data: revenueByCategoryData.map(e => e.totalRevenue),
+                                backgroundColor: "#10b981"
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            animation: { duration: 1000, easing: "easeInOutQuad" },
+                            plugins: {
+                                legend: {
+                                    labels: {
+                                        color: fontColor,
+                                        font: fontStyle
+                                    }
+                                }
+                            },
+                            scales: {
+                                x: {
+                                    ticks: {
+                                        color: fontColor,
+                                        font: fontStyle // Apply font style to X-axis ticks
+                                    }
+                                },
+                                y: {
+                                    ticks: {
+                                        color: fontColor,
+                                        font: fontStyle // Apply font style to Y-axis ticks
+                                    }
+                                }
+                            }
+                        }
+                    });
+
+                    // 🔥 Top Selling Products (Horizontal Bar)
+                    new Chart(document.getElementById("topProductsChart"), {
+                        type: "bar",
+                        data: {
+                            labels: topSellingProductsData.map(e => e._id || "Unknown"),
+                            datasets: [{
+                                label: "Units Sold",
+                                data: topSellingProductsData.map(e => e.totalSold),
+                                backgroundColor: "#f97316"
+                            }]
+                        },
+                        options: {
+                            indexAxis: 'y',
+                            responsive: true,
+                            animation: { duration: 1200, easing: "easeOutQuart" },
+                            plugins: {
+                                legend: {
+                                    labels: {
+                                        color: fontColor,
+                                        font: fontStyle
+                                    }
+                                }
+                            },
+                            scales: {
+                                x: {
+                                    ticks: {
+                                        color: fontColor,
+                                        font: fontStyle // Apply font style to X-axis ticks
+                                    }
+                                },
+                                y: {
+                                    ticks: {
+                                        color: fontColor,
+                                        font: fontStyle // Apply font style to Y-axis ticks
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+
+                // Initial render
+                buildCharts();
+
+                // Optional: re-render on theme toggle
+                // You can destroy old charts first or refresh the page if needed
+            </script>

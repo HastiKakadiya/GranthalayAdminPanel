@@ -1,0 +1,121 @@
+<%- include('layouts/sidebar'); %>
+  <%- include('layouts/header'); %>
+
+    <section class="content-main">
+      <div class="container">
+        <h2 class="text">🛒 Create New Product</h2>
+
+        <% if (message) { %>
+          <div class="alert alert-danger shadow-sm" id="message">
+            <%= message %>
+          </div>
+          <% } %>
+
+            <form id="productForm" action="/product-add" method="POST" enctype="multipart/form-data">
+              <div><label>Title:</label><input type="text" name="title" required /></div>
+              <div><label>Short Description:</label><textarea name="short_description" required></textarea></div>
+              <div><label>Full Description:</label><textarea name="full_description" required></textarea></div>
+              <div><label>Assign Price:</label><input type="number" name="assign_price" min="0" required /></div>
+              <div><label>Unassign Price:</label><input type="number" name="unassign_price" min="0" required /></div>
+
+              <div>
+                <label>Main Category:</label>
+                <select name="parent_categories" id="parentCategory" required>
+                  <option value="">Select</option>
+                  <% categories.forEach(cat=> { %>
+                    <option value="<%= cat._id %>">
+                      <%= cat.name %>
+                    </option>
+                    <% }) %>
+                </select>
+              </div>
+
+              <div>
+                <label>Sub Category:</label>
+                <select name="sub_categories" id="subCategory" required></select>
+              </div>
+
+              <div>
+                <label>Child Category:</label>
+                <select name="child_categories" id="childCategory">
+                  </select>
+                  
+                </div>
+
+              <div>
+                <label>Parent Attribute:</label>
+                <select name="parent_attributes" id="parentAttribute" required>
+                  <option value="">Select</option>
+                  <% attributes.forEach(attr=> { %>
+                    <option value="<%= attr._id %>">
+                      <%= attr.name %>
+                    </option>
+                    <% }) %>
+                </select>
+              </div>
+
+              <div>
+                <label>Child Attribute:</label>
+                <select name="child_attributes" id="childAttribute"></select>
+              </div>
+
+              <div><label>SKU:</label><input type="text" name="sku" required /></div>
+
+              <div>
+                <label>Status:</label>
+                <select name="status" required>
+                  <option value="true">Active</option>
+                  <option value="false">Inactive</option>
+                </select>
+              </div>
+
+              <div><label>Total Stock:</label><input type="number" name="total_stock" required /></div>
+              <div><label>Languages:</label><input type="text" name="languages" placeholder="en,hi,gu" /></div>
+
+              <div><label>Cover Image:</label><input type="file" name="cover_image" accept="image/*" required /></div>
+              <div><label>Other Images:</label><input type="file" name="other_images" multiple /> <!-- ✅ Correct -->
+              </div>
+
+              <button type="submit">Submit</button>
+            </form>
+
+            <script>
+              document.addEventListener("DOMContentLoaded", () => {
+                const parentCategory = document.getElementById("parentCategory");
+                const subCategory = document.getElementById("subCategory");
+                const childCategory = document.getElementById("childCategory");
+
+                const parentAttribute = document.getElementById("parentAttribute");
+                const childAttribute = document.getElementById("childAttribute");
+
+                parentCategory.addEventListener("change", async () => {
+                  const res = await fetch(`/product-add/subcategories/${parentCategory.value}`);
+                  const data = await res.json();
+                  subCategory.innerHTML = '<option value="">Select</option>';
+                  data.forEach(cat => {
+                    subCategory.innerHTML += `<option value="${cat._id}">${cat.name}</option>`;
+                  });
+                  childCategory.innerHTML = '<option value="">Select</option>';
+                });
+
+                subCategory.addEventListener("change", async () => {
+                  const res = await fetch(`/product-add/subcategories/${subCategory.value}`);
+                  const data = await res.json();
+                  childCategory.innerHTML = '<option value="">Select</option>';
+                  data.forEach(cat => {
+                    childCategory.innerHTML += `<option value="${cat._id}">${cat.name}</option>`;
+                  });
+                });
+
+                parentAttribute.addEventListener("change", async () => {
+                  const res = await fetch(`/product-add/attributes/${parentAttribute.value}`);
+                  const data = await res.json();
+                  childAttribute.innerHTML = '<option value="">Select</option>';
+                  data.forEach(attr => {
+                    childAttribute.innerHTML += `<option value="${attr._id}">${attr.name}</option>`;
+                  });
+                });
+              });
+            </script>
+      </div>
+    </section>

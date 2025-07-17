@@ -1,0 +1,178 @@
+<%- include('layouts/sidebar'); %>
+<%- include('layouts/header'); %>
+
+<section class="content-main">
+    <div class="content-header">
+        <h2 class="content-title card-title">Customers List</h2>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <input type="text" id="searchInput" class="form-control border" placeholder="Search by ID,name, email, phone...">
+        </div>
+        <div class="col-md-2">
+            <select id="blockStatusFilter" class="form-select border">
+                <option value="">All</option>
+                <option value="true">Blocked</option>
+                <option value="false">Unblocked</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <select id="sortFilter" class="form-select border">
+                <option value="desc">Newest First</option>
+                <option value="asc">Oldest First</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <select id="limitFilter" class="form-select border">
+                <option value="10">Show 10</option>
+                <option value="20">Show 20</option>
+                <option value="50">Show 50</option>
+                <option value="100">Show 100</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <button id="clearFilters" class="btn btn-danger">Clear Filters</button>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover border">
+                    <thead class="border">
+                        <tr>
+                            <th>No</th>
+                            <th>User Id</th>
+                            <th>Full Name</th>
+                            <th>Username</th>
+                            <th>Phone</th>
+                            <th>Email</th>
+                            <th>Create Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <input type="number" hidden id="totalPages" value="<%= totalPages %>">
+    <div class="paginations">
+        <nav>
+            <ul class="pagination" id="pagination-customers"></ul>
+        </nav>
+    </div>
+</section>
+
+<%- include('layouts/footer'); %>
+
+<script>
+$(function () {
+    let totalPages = Number($("#totalPages").val());
+
+    window.pagObj = $("#pagination-customers").twbsPagination({
+        totalPages: totalPages,
+        visiblePages: 3,
+        onPageClick: function (event, page) {
+            fetchCustomers(page);
+        },
+    });
+
+    function fetchCustomers(page) {
+        let search = $("#searchInput").val();
+        let blockStatus = $("#blockStatusFilter").val();
+        let sortBy = $("#sortFilter").val();
+        let limit = $("#limitFilter").val();
+
+        let send = { 
+            page: Number(page), 
+            search: search, 
+            blockStatus: blockStatus,
+            sortBy: sortBy, 
+            limit: limit, 
+            message: "paginations-users" 
+        };
+
+        $.post("/customers/pagination", send, function (data) {
+            $("tbody").html("");
+            jQuery.each(data.docs, function (index, data) {
+                let dateObj = new Date(data.createdAt);
+                let dateFormatted = dateObj.getDate() + "/" + (dateObj.getMonth() + 1) + "/" + dateObj.getFullYear();
+                
+                $("tbody").append(`
+                    <tr>
+                        <td>${(page - 1) * limit + index + 1}</td>
+                        <td><b>${data._id}</b></td>
+                        <td>${data.full_name}</td>
+                        <td>${data.username}</td>
+                        <td>${data.phone}</td>
+                        <td>${data.email}</td>
+                        <td>${dateFormatted}</td>
+                        <td>
+                            <span class="badge ${data.isBlocked ? 'bg-danger' : 'bg-success'}">
+                                ${data.isBlocked ? 'Blocked' : 'Active'}
+                            </span>
+                        </td>
+                        <td>
+                            <% /* <button class="btn btn-info btn-sm view-details" data-id="${data._id}">View</button> */ %>
+                            <button onclick="toggleBlockUser('${data._id}', ${data.isBlocked})"
+        class="btn btn-${data.isBlocked ? 'success' : 'danger'} btn-sm toggle-block" 
+        data-id="${data._id}" 
+        data-block="${!data.isBlocked}">
+    ${data.isBlocked ? 'Unblock' : 'Block'}
+</button>
+                        </td>
+                    </tr>
+                `);
+            });
+        });
+    }
+
+    $(document).on("click", ".toggle-block", function () {
+        let customerId = $(this).data("id");
+        let isBlocked = $(this).data("block");
+
+        $.post("/customers/toggle-block", { id: customerId, isBlocked: isBlocked }, function (response) {
+            if (response.success) {
+                fetchCustomers(1);
+            }
+        });
+    });
+    $("#clearFilters").click(function () {
+                    window.location.href = window.location.pathname; // Redirects to the same page
+    });
+    $("#searchInput, #blockStatusFilter, #sortFilter, #limitFilter").on("input change", function () {
+        fetchCustomers(1);
+    });
+
+    $("#clearFilters").click(function () {
+    // Set default values for filters
+    $("#blockStatusFilter").val(""); // Default: All
+    $("#sortFilter").val("desc"); // Default: Newest First
+    $("#limitFilter").val("10"); // Default: Show 10
+
+    // Fetch customers using default values while keeping search text unchanged
+    fetchCustomers(1);
+});
+});
+function toggleBlockUser(userId, isBlocked) {
+    let action = isBlocked ? "unblock" : "block";
+    
+    if (confirm(`Are you sure you want to ${action} this user?`)) {
+        $.post("/customers/toggle-block", { id: userId, isBlocked: !isBlocked }, function (response) {
+            if (response.success) {
+                alert(`User successfully ${action}ed!`);
+                location.reload(); // Refresh the page to update status
+            } else {
+                alert("Error updating user status.");
+            }
+        }).fail(function() {
+            alert("Server error. Please try again.");
+        });
+    }
+}
+
+</script>

@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Update Product</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        a.btn:hover {
+            transform: scale(1.03);
+            transition: all 0.3s ease-in-out;
+        }
+    </style>
+
+    <script>
+        setTimeout(() => {
+            const alert = document.getElementById('successAlert');
+            if (alert) {
+                alert.classList.remove('animate__fadeInDown');
+                alert.classList.add('animate__fadeOutUp');
+                setTimeout(() => alert.remove(), 1000);
+            }
+        }, 3000); // auto-hide after 3 seconds
+    </script>
+    <script>
+        setTimeout(() => {
+            const alert = document.getElementById('failureAlert');
+            if (alert) {
+                alert.classList.remove('show');
+                alert.classList.add('hide');
+            }
+        }, 3000);
+    </script>
+
+    <style>
+        select[name="subcategory_id"] {
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        select[name="category_id"] {
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        /* Base color variables for light and dark themes */
+        :root {
+            --bg-color: #ffffff;
+            --text-color: #1a1a1a;
+            --card-bg: #f9f9f9;
+            --card-border: #e0e0e0;
+            --primary-color: #4a90e2;
+            --secondary-color: #6c757d;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            --transition: 0.3s ease;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #121212;
+            --text-color: #f5f5f5;
+            --card-bg: #1e1e1e;
+            --card-border: #2c2c2c;
+            --primary-color: #4a90e2;
+            --secondary-color: #999999;
+            --success-color: #28d37c;
+            --danger-color: #ff4c4c;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: var(--font-family);
+            margin: 0;
+            padding: 0;
+            transition: var(--transition);
+        }
+
+        /* Utility classes */
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            transition: var(--transition);
+        }
+
+        .card:hover {
+            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.1);
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            color: var(--text-color);
+            margin: 0 0 0.5rem 0;
+        }
+
+        a {
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Buttons */
+        .button {
+            background-color: var(--primary-color);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 0.6rem 1.2rem;
+            cursor: pointer;
+            font-weight: 500;
+            transition: var(--transition);
+            background-color: #aa6233;
+            width: 200px;
+            margin-top: 20px;
+        }
+
+        .button:hover {
+            background-color: darken(var(--primary-color), 10%);
+        }
+
+        /* Table styles */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+        }
+
+        th,
+        td {
+            padding: 0.8rem;
+            text-align: left;
+            border-bottom: 1px solid var(--card-border);
+            color: var(--text-color);
+        }
+
+        th {
+            background-color: var(--card-bg);
+            font-weight: bold;
+        }
+
+        /* Form elements */
+        input,
+        select,
+        textarea {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 6px;
+            padding: 0.5rem;
+            color: var(--text-color);
+            transition: var(--transition);
+            width: 100%;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            border-color: var(--primary-color);
+            outline: none;
+        }
+
+        /* Toggle Theme Switch (if needed) */
+        .theme-toggle {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 999px;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        label {
+            margin-bottom: 10px;
+            margin-top: 10px;
+        }
+
+
+        .preview-img {
+            border-radius: 8px;
+            margin-top: 8px;
+            border: 1px solid var(--card-border);
+            max-height: 100px;
+            object-fit: cover;
+        }
+
+        .headings {
+            margin-bottom: 20px;
+            margin-top: 20px;
+            font-size: 17px;
+            font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+            border-bottom: #ffffff;
+            border-width: 1;
+            background-color: #a77b02;
+            border-radius: 10px;
+            padding: 10px;
+        }
+    </style>
+
+</head>
+
+<%- include('layouts/sidebar'); %>
+    <%- include('layouts/header'); %>
+
+        <section class="content-main">
+            <div class="container">
+                <div class="d-flex justify-content-between align-items-center my-3">
+                    <h2 class="text mb-0">🛒 Update Product Details</h2>
+
+                    <a href="/products"
+                        class="btn btn-outline-primary d-flex align-items-center gap-2 px-4 py-2 rounded-pill shadow-sm"
+                        style="max-width: fit-content; font-weight: 500; text-decoration: none;"
+                        onmouseover="this.style.textDecoration='none'" onmouseout="this.style.textDecoration='none'">
+                        <i class="bi bi-house-door-fill" style="font-size: 1.2rem;"></i>
+                        Back to Product List
+                    </a>
+                </div>
+                <% if (message) { %>
+                    <div class="alert alert-danger">
+                        <%= message %>
+                    </div>
+                    <% } %>
+                        <form action="/products-update/edit/<%= productsData._id %>" method="POST"
+                            enctype="multipart/form-data" class="card">
+
+                            <!-- === Basic Info === -->
+                            <fieldset>
+                                <legend class="headings">Basic Information</legend>
+                                <div class="mb-3">
+                                    <label>Title:</label>
+                                    <input type="text" name="title" class="form-control border"
+                                        value="<%= productsData.title %>" required />
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label>Slug:</label>
+                                        <input type="text" name="slug" class="form-control border"
+                                            value="<%= productsData.slug %>" required />
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label>SKU:</label>
+                                        <input type="text" class="form-control border" name="sku"
+                                            value="<%= productsData.sku %>" required />
+                                    </div>
+                                </div>
+                            </fieldset>
+
+                            <!-- === Pricing Section === -->
+                            <fieldset>
+                                <legend class="headings">Pricing</legend>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label>Assign Price:</label>
+                                        <input type="number" class="form-control border" name="assign_price"
+                                            value="<%= productsData.assign_price %>" step="0.01" />
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label>Unassign Price:</label>
+                                        <input type="number" name="unassign_price" class="form-control border"
+                                            value="<%= productsData.unassign_price %>" step="0.01" />
+                                    </div>
+                                </div>
+                            </fieldset>
+
+                            <!-- === Category Section === -->
+                            <fieldset>
+                                <legend class="headings">Category Details</legend>
+
+                                <div class="mb-3">
+                                    <label for="parent_categories">Parent Category <span
+                                            class="text-danger">*</span></label>
+                                    <select name="categories" id="parentCategory" class="form-select" required>
+                                        <% parentCategories.forEach(cat=> { %>
+                                            <option value="<%= cat._id %>"
+                                                <%=productsData.categories?.toString()===cat._id.toString() ? 'selected'
+                                                : '' %>><%= cat.name %>
+                                            </option>
+                                            <% }) %>
+                                    </select>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="sub_categories">Subcategory</label>
+                                    <select name="sub_categories" id="subCategory" class="form-select">
+                                        <option value="">Select Subcategory</option>
+                                        <% subcategories.forEach(function(sub) { %>
+                                            <option value="<%= sub._id %>"
+                                                <%=productsData.sub_categories?.toString()===sub._id.toString()
+                                                ? 'selected' : '' %>><%= sub.name %>
+                                            </option>
+                                            <% }); %>
+                                    </select>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="child_categories">Child Category (Optional)</label>
+                                    <select name="child_categories" id="childCategory" class="form-select">
+                                        <option value="">Select Child Category</option>
+                                        <% childcategories.forEach(function(child) { %>
+                                            <option value="<%= child._id %>"
+                                                <%=productsData.child_categories?.toString()===child._id.toString()
+                                                ? 'selected' : '' %>><%= child.name %>
+                                            </option>
+                                            <% }); %>
+                                    </select>
+                                </div>
+                            </fieldset>
+
+                            <!-- === Inventory and Status === -->
+                            <fieldset>
+                                <legend class="headings">Stock & Status</legend>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label>Total Stock:</label>
+                                        <input type="number" name="total_stock" class="form-control border"
+                                            value="<%= productsData.total_stock %>" required />
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label>Original Language:</label>
+                                        <input type="text" name="languages" class="form-control border"
+                                            value="<%= productsData.languages?.join(', ') %>"
+                                            placeholder="e.g. English, Hindi" />
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label>Status:</label>
+                                        <select name="status" class="form-select">
+                                            <option value="true" <%=productsData.status===true ? 'selected' : '' %>
+                                                >Active</option>
+                                            <option value="false" <%=productsData.status===false ? 'selected' : '' %>
+                                                >Inactive</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </fieldset>
+
+                            <!-- === Images Section === -->
+                            <fieldset>
+                                <legend class="headings">Images</legend>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label>Cover Image:</label>
+                                        <div style="margin: 20px;">
+                                            <% if (productsData.cover_image?.url) { %>
+                                                <img src="<%= productsData.cover_image.url.replace('http://localhost:8000', '') %>"
+                                                    height="150" id="cover_photo" class="preview-img" />
+                                                <% } else { %>
+                                                    <img src="/<%= productsData.cover_image.url.replace('http://localhost:8000', '') %>"
+                                                        height="150" id="cover_photo" class="preview-img" />
+                                                    <% } %>
+                                        </div>
+                                        <input type="file" name="cover_image" accept="image/*" class="form-control"
+                                            onchange="coverPhoto(event)" />
+                                    </div>
+
+                                    <div class="col-md-6 mb-3">
+                                        <label>Other Images:</label>
+                                        <div style="margin: 20px;" class="preview-img-container d-flex flex-wrap gap-2">
+                                            <% if (productsData.other_image &&
+                                                Array.isArray(productsData.other_image.url) &&
+                                                productsData.other_image.url.length> 0) { %>
+                                                <% productsData.other_image.url.forEach(function(imgUrl, index) { %>
+                                                    <img src="<%= imgUrl.replace('http://localhost:8000', '') %>"
+                                                        class="img-fluid rounded shadow preview-img"
+                                                        alt="Other Image <%= index + 1 %>"
+                                                        style="width: 110px; height: 150px; object-fit: cover; cursor: pointer;"
+                                                        data-bs-toggle="modal" data-bs-target="#imageSliderModal"
+                                                        onclick="showSlide(<%= index %>)">
+                                                    <% }); %>
+                                                        <% } else { %>
+                                                            <p class="text-muted">No other images</p>
+                                                            <% } %>
+                                        </div>
+                                        <input type="file" name="other_image" accept="image/*" class="form-control"
+                                            onchange="otherPhoto(event)" multiple />
+                                    </div>
+
+
+
+                                </div>
+                            </fieldset>
+
+                            <!-- === Description Section === -->
+                            <fieldset>
+                                <legend class="headings">Descriptions</legend>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label>Short Description:</label>
+                                        <textarea name="short_description" class="form-control border"
+                                            rows="3"><%= productsData.short_description %></textarea>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label>Full Description:</label>
+                                        <textarea name="full_description" class="form-control border"
+                                            rows="4"><%= productsData.full_description %></textarea>
+                                    </div>
+                                </div>
+                            </fieldset>
+
+                            <!-- === Attributes Section === -->
+                            <fieldset>
+                                <legend class="headings">Attributes</legend>
+                                <% if (parentAttributes.length) { %>
+                                    <% parentAttributes.forEach((attr, index)=> {
+                                        const isParentChecked = productsData.parent_attributes?.some(id => id.toString()
+                                        === attr._id.toString());
+                                        %>
+                                        <div class="form-check mb-2">
+                                            <input type="checkbox" class="form-check-input parent-attr-checkbox"
+                                                style="margin-top: 5px;" id="parentAttr<%= index %>"
+                                                name="parent_attributes[]" value="<%= attr._id %>"
+                                                data-child-group="childGroup<%= index %>" <%=isParentChecked ? 'checked'
+                                                : '' %>>
+                                            <p class="form-check-label fw-bold" for="parentAttr<%= index %>">
+                                                <%= attr.name %>
+                                            </p>
+                                        </div>
+
+                                        <div class="ms-4 mt-2 child-attr-group <%= isParentChecked ? '' : 'd-none' %>"
+                                            id="childGroup<%= index %>">
+                                            <% childAttributes.filter(child=> child.parent.toString() ===
+                                                attr._id.toString()).forEach((childAttr, childIndex) => {
+                                                const isChildChecked = productsData.child_attributes?.some(id =>
+                                                id.toString() === childAttr._id.toString());
+                                                %>
+                                                <div class="form-check">
+                                                    <input type="checkbox" class="form-check-input"
+                                                        name="child_attributes[]" value="<%= childAttr._id %>"
+                                                        id="childAttr<%= index %>_<%= childIndex %>" <%=isChildChecked
+                                                        ? 'checked' : '' %>>
+                                                    <p class="form-check-label"
+                                                        for="childAttr<%= index %>_<%= childIndex %>">
+                                                        <%= childAttr.name %>
+                                                    </p>
+                                                </div>
+                                                <% }) %>
+                                        </div>
+                                        <% }) %>
+                                            <% } else { %>
+                                                <p>No attributes found.</p>
+                                                <% } %>
+                            </fieldset>
+
+                            <!-- === Submit Button === -->
+                            <div class="col-md-12 mt-3 d-flex justify-content-center">
+                                <button type="submit" class="button">Update</button>
+                            </div>
+
+
+                        </form>
+                        <% if (success) { %>
+                            <div id="successAlert"
+                                class="alert alert-success alert-dismissible fade show animate__animated animate__fadeInDown"
+                                role="alert"
+                                style="z-index: 9999; position: fixed; top: 20px; right: 20px; min-width: 250px;">
+                                <%= success %>
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                        aria-label="Close"></button>
+                            </div>
+                            <% } %>
+                                <% if (failure) { %>
+                                    <div id="failureAlert"
+                                        class="alert alert-danger alert-dismissible fade show animate__animated animate__fadeInDown"
+                                        role="alert"
+                                        style="z-index: 9999; position: fixed; top: 80px; right: 20px; min-width: 250px;">
+                                        <%= failure %>
+                                            <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                                aria-label="Close"></button>
+                                    </div>
+                                    <% } %>
+
+
+
+            </div>
+
+        </section>
+        </body>
+
+</html>
+
+
+<%- include('layouts/footer'); %>
+
+    <script>
+        // When parent category changes
+        document.getElementById('parentCategory').addEventListener('change', function () {
+            const parentId = this.value;
+
+            fetch('/products-create/sub-find', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: 'sub-find', id: parentId })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    let subOptions = '<option value="">Select Subcategory</option>';
+                    data.forEach(cat => {
+                        subOptions += `<option value="${cat._id}">${cat.name}</option>`;
+                    });
+                    document.getElementById('subCategory').innerHTML = subOptions;
+
+                    // Reset child categories
+                    document.getElementById('childCategory').innerHTML = '<option value="">Select Child Category</option>';
+                });
+        });
+
+        // When subcategory changes
+        document.getElementById('subCategory').addEventListener('change', function () {
+            const subId = this.value;
+
+            fetch('/products-create/child-find', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: 'child-find', id: subId })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    let childOptions = '<option value="">Select Child Category</option>';
+                    data.forEach(cat => {
+                        childOptions += `<option value="${cat._id}">${cat.name}</option>`;
+                    });
+                    document.getElementById('childCategory').innerHTML = childOptions;
+                });
+        });
+
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const parentSelect = document.getElementById('parentCategory');
+            const subSelect = document.getElementById('subCategory');
+            const childSelect = document.getElementById('childCategory');
+
+            const currentParent = '<%= productsData.parent_category %>';
+            const currentSub = '<%= productsData.subcategory %>';
+            const currentChild = '<%= productsData.child_categories?.[0] || "" %>'; // assuming one child selected
+
+            // Preselect current parent
+            if (currentParent) parentSelect.value = currentParent;
+
+            // Load subcategories and preselect current subcategory
+            if (currentParent) {
+                fetch('/products-create/sub-find', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: 'sub-find', id: currentParent })
+                })
+                    .then(res => res.json())
+                    .then(data => {
+                        let subOptions = '<option value="">Select Subcategory</option>';
+                        data.forEach(cat => {
+                            const selected = (cat._id === currentSub) ? 'selected' : '';
+                            subOptions += `<option value="${cat._id}" ${selected}>${cat.name}</option>`;
+                        });
+                        subSelect.innerHTML = subOptions;
+
+                        // Load child categories only if subcategory is selected
+                        if (currentSub) {
+                            fetch('/products-create/child-find', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ message: 'child-find', id: currentSub })
+                            })
+                                .then(res => res.json())
+                                .then(data => {
+                                    let childOptions = '<option value="">Select Child Category</option>';
+                                    data.forEach(cat => {
+                                        const selected = (cat._id === currentChild) ? 'selected' : '';
+                                        childOptions += `<option value="${cat._id}" ${selected}>${cat.name}</option>`;
+                                    });
+                                    childSelect.innerHTML = childOptions;
+                                });
+                        }
+                    });
+            }
+
+            // Handle parent category change
+            parentSelect.addEventListener('change', function () {
+                const parentId = this.value;
+
+                fetch('/products-create/sub-find', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: 'sub-find', id: parentId })
+                })
+                    .then(res => res.json())
+                    .then(data => {
+                        let subOptions = '<option value="">Select Subcategory</option>';
+                        data.forEach(cat => {
+                            subOptions += `<option value="${cat._id}">${cat.name}</option>`;
+                        });
+                        subSelect.innerHTML = subOptions;
+                        childSelect.innerHTML = '<option value="">Select Child Category</option>';
+                    });
+            });
+
+            // Handle subcategory change
+            subSelect.addEventListener('change', function () {
+                const subId = this.value;
+
+                fetch('/products-create/child-find', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: 'child-find', id: subId })
+                })
+                    .then(res => res.json())
+                    .then(data => {
+                        let childOptions = '<option value="">Select Child Category</option>';
+                        data.forEach(cat => {
+                            childOptions += `<option value="${cat._id}">${cat.name}</option>`;
+                        });
+                        childSelect.innerHTML = childOptions;
+                    });
+            });
+        });
+
+    </script>
+
+    <script>
+        document.querySelectorAll('.parent-attr-checkbox').forEach(checkbox => {
+            const targetId = checkbox.dataset.childGroup;
+            const childGroup = document.getElementById(targetId);
+
+            // On load
+            if (checkbox.checked) {
+                childGroup.classList.remove('d-none');
+            }
+
+            // On change
+            checkbox.addEventListener('change', () => {
+                if (checkbox.checked) {
+                    childGroup.classList.remove('d-none');
+                } else {
+                    childGroup.classList.add('d-none');
+                    childGroup.querySelectorAll('input[type="checkbox"]').forEach(child => {
+                        child.checked = false;
+                    });
+                }
+            });
+        });
+    </script>
+
+
+
+    <script>
+        function coverPhoto(event) {
+            const image = document.getElementById("cover_photo");
+            image.src = URL.createObjectURL(event.target.files[0]);
+        }
+
+        function otherPhoto(event) {
+            const previewContainer = document.querySelector(".preview-img-container");
+            previewContainer.innerHTML = "";
+            Array.from(event.target.files).forEach(file => {
+                const img = document.createElement("img");
+                img.src = URL.createObjectURL(file);
+                img.height = 50;
+                img.style.margin = "5px";
+                img.classList.add("img-thumbnail");
+                previewContainer.appendChild(img);
+            });
+        }
+    </script>
+
+
+
+    <!-- <script>
+        function coverPhoto(event) {
+            const image = document.getElementById("cover_photo");
+            image.src = URL.createObjectURL(event.target.files[0]);
+        }
+
+        function otherPhoto(event) {
+            const previewContainer = document.querySelector(".preview-img-container");
+            previewContainer.innerHTML = "";
+            Array.from(event.target.files).forEach(file => {
+                const img = document.createElement("img");
+                img.src = URL.createObjectURL(file);
+                img.height = 50;
+                img.classList.add("me-2", "mb-2");
+                previewContainer.appendChild(img);
+            });
+        }
+    </script> -->

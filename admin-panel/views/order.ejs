@@ -1,0 +1,303 @@
+<%- include('layouts/sidebar'); %>
+    <%- include('layouts/header'); %>
+
+        <section class="content-main">
+            <div class="content-header">
+                <div>
+                    <h2 class="content-title card-title">Order List</h2>
+                </div>
+                <button class="order-report-button">
+                    <a href="/order-report" class="order-report-link">
+                        View Order Report
+                    </a>
+                </button>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <input type="text" id="searchBox" class="form-control border"
+                        placeholder="Search by Customer phone, email, or Order ID">
+                </div>
+                <div class="col-md-3">
+                    <select id="paymentStatusFilter" class="form-control border">
+                        <option value="">Filter by Payment Status</option>
+                        <option value="paid">Paid</option>
+                        <option value="pending">Pending</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select id="paymentMethodFilter" class="form-control border">
+                        <option value="">Filter by Payment Method</option>
+                        <option value="Online">Online</option>
+                        <option value="COD">Cash on Delivery</option>
+                        <option value="Card">Card</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="button" id="clearFilters" class="btn btn-danger">Clear Filters</button>
+                </div>
+            </div>
+
+            <!-- Loading Spinner -->
+            <div id="loadingSpinner" style="display:none; text-align: center;">
+                <img src="/images/spinner.svg" alt="Loading..." style="height: 40px;" />
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="border">
+                                <tr>
+                                    <th>Index</th>
+                                    <th>Order Number</th>
+                                    <th>Customer Phone</th>
+                                    <th>Customer Email</th>
+                                    <th>Payment Status</th>
+                                    <th>Payment Method</th>
+                                    <th>Delivery Status</th>
+                                    <th>Order Date</th>
+                                    <th>Total Amount</th>
+                                    <th class="text-center">Detail</th>
+                                    <th class="text-center">Invoice</th>
+                                </tr>
+                            </thead>
+                            <tbody class="border">
+                                <% orderItems.forEach(function(order, index) { %>
+                                    <tr>
+                                        <td class="text-center">
+                                            <%= index + 1 %>
+                                        </td>
+                                        <td class="text-center"><b>
+                                                <%= order.orderNumber || 'N/A' %>
+                                            </b></td>
+                                        <td class="text-center">
+                                            <%= order.customer_id?.phone || "N/A" %>
+                                        </td>
+                                        <td class="text-center">
+                                            <%= order.customer_id?.email || "N/A" %>
+                                        </td>
+                                        <td class="text-center">
+                                            <span
+                                                class="badge rounded-pill <%= order.payment ? 'alert-success' : 'alert-danger' %>">
+                                                <%= order.payment ? "Paid" : "Pending" %>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="badge rounded-pill alert-warning">
+                                                <%= order.type || "N/A" %>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <% let statusColor={ "Pending" : "#ffc107" , "Processing" : "#0d6efd"
+                                                , "Shipped" : "#0dcaf0" , "Delivered" : "#198754" , "Cancelled"
+                                                : "#dc3545" }[order.status] || "#6c757d" ; %>
+                                                <span
+                                                    style="background:<%= statusColor %>; color: #fff; font-weight: 600; padding: 4px 10px; border-radius: 20px;">
+                                                    <%= order.status %>
+                                                </span>
+                                        </td>
+                                        <td>
+                                            <%= new Date(order.createdAt).toLocaleDateString() %>
+                                        </td>
+                                        <td>
+                                            <%= order.totalCost ? order.totalCost + "/-" : "N/A" %>
+                                        </td>
+                                        <td class="text-end">
+                                            <a href="/order-details/<%= order._id %>"
+                                                class="btn btn-md rounded font-sm">Detail</a>
+                                        </td>
+                                        <td class="text-end">
+                                            <a href="/order/invoice/<%= order._id %>"
+                                                class="btn btn-md rounded font-sm">Invoice</a>
+                                        </td>
+                                    </tr>
+                                    <% }); %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <input type="number" hidden id="totalPages" value="<%= totalPages %>">
+            <div class="paginations">
+                <nav aria-label="Page navigation example">
+                    <ul class="pagination" id="pagination-products"></ul>
+                </nav>
+            </div>
+        </section>
+
+        <%- include('layouts/footer'); %>
+
+            <script>
+                $(document).ready(function () {
+                    const totalPages = Number($("#totalPages").val());
+
+                    window.pagObj = $("#pagination-products").twbsPagination({
+                        totalPages: totalPages,
+                        visiblePages: 3,
+                        onPageClick: function (event, page) {
+                            fetchOrders(page);
+                        },
+                    });
+
+                    $("#clearFilters").click(function () {
+                        window.location.href = "/order";
+                    });
+
+                    function fetchOrders(page) {
+                        $("#loadingSpinner").show();
+
+                        const search = $("#searchBox").val();
+                        const paymentStatus = $("#paymentStatusFilter").val();
+                        const paymentMethod = $("#paymentMethodFilter").val();
+
+                        const send = {
+                            page: Number(page),
+                            search: search,
+                            paymentStatus: paymentStatus,
+                            paymentMethod: paymentMethod
+                        };
+
+                        $.post("/order/pagination", send, function (data) {
+                            $("#loadingSpinner").hide();
+                            $("tbody").empty();
+
+                            if (!data.docs.length) {
+                                $("tbody").html(`<tr><td colspan="11" class="text-center">No orders found.</td></tr>`);
+                                return;
+                            }
+
+                            const startIndex = (page - 1) * (data.limit || 10);
+
+                            data.docs.forEach(function (order, index) {
+                                const i = startIndex + index + 1;
+                                const date = new Date(order.createdAt);
+                                const formattedDate = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
+                                const statusColor = {
+                                    "Pending": "#ffc107",
+                                    "Processing": "#0d6efd",
+                                    "Shipped": "#0dcaf0",
+                                    "Delivered": "#198754",
+                                    "Cancelled": "#dc3545"
+                                }[order.status] || "#6c757d";
+
+                                const row = `
+                        <tr>
+                            <td>${i}</td>
+                            <td><b>${order.orderNumber || 'N/A'}</b></td>
+                            <td>${order.customer_id?.phone || "N/A"}</td>
+                            <td>${order.customer_id?.email || "N/A"}</td>
+                            <td>
+                                <span class="badge rounded-pill ${order.payment ? 'alert-success' : 'alert-danger'}">
+                                    ${order.payment ? "Paid" : "Pending"}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge rounded-pill alert-warning">${order.type || "N/A"}</span>
+                            </td>
+                            <td>
+                                <span style="background:${statusColor}; color:#fff; font-weight:600; padding:4px 10px; border-radius:20px;">
+                                    ${order.status}
+                                </span>
+                            </td>
+                            <td>${formattedDate}</td>
+                            <td>${order.totalCost ? order.totalCost + "/-" : "N/A"}</td>
+                            <td class="text-end">
+                                <a href="/order-details/${order._id}" class="btn btn-md rounded font-sm">Detail</a>
+                            </td>
+                            <td class="text-end">
+                                <a href="/order/invoice/${order._id}" class="btn btn-md rounded font-sm">Invoice</a>
+                            </td>
+                        </tr>`;
+                                $("tbody").append(row);
+                            });
+
+                            if ($("#pagination-products").twbsPagination("getPagesCount") !== data.totalPages) {
+                                $("#pagination-products").twbsPagination("destroy");
+                                $("#pagination-products").twbsPagination({
+                                    totalPages: data.totalPages,
+                                    visiblePages: 3,
+                                    onPageClick: function (event, page) {
+                                        fetchOrders(page);
+                                    },
+                                });
+                            }
+                        });
+                    }
+
+                    let searchTimeout;
+                    $("#searchBox").on("input", function () {
+                        clearTimeout(searchTimeout);
+                        searchTimeout = setTimeout(() => {
+                            fetchOrders(1);
+                        }, 500);
+                    });
+
+                    $("#paymentStatusFilter, #paymentMethodFilter").on("change", function () {
+                        fetchOrders(1);
+                    });
+                });
+            </script>
+            <style>
+                /* Basic button styling */
+                .order-report-button {
+                    background-color: #4CAF50;
+                    border: none;
+                    color: white;
+                    padding: 15px 32px;
+                    text-align: center;
+                    text-decoration: none;
+                    display: inline-block;
+                    font-size: 16px;
+                    margin: 4px 2px;
+                    cursor: pointer;
+                    border-radius: 8px;
+                    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+                    transition: all 0.3s ease-in-out;
+                }
+
+                /* Hover effect */
+                .order-report-button:hover {
+                    background-color: #45a049;
+                    transform: scale(1.1);
+                    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+                }
+
+                /* Animated effect on button */
+                .order-report-button:active {
+                    animation: pulse 0.6s ease-out;
+                }
+
+                /* Pulse animation */
+                @keyframes pulse {
+                    0% {
+                        transform: scale(1);
+                    }
+
+                    50% {
+                        transform: scale(1.1);
+                    }
+
+                    100% {
+                        transform: scale(1);
+                    }
+                }
+
+                /* Link styling */
+                .order-report-link {
+                    color: #ffffff;
+                    /* Initial color */
+                    font-size: 16px;
+                    text-decoration: none;
+                    /* Removes underline */
+                    transition: color 0.3s ease-in-out;
+                    /* Smooth color transition */
+                }
+
+                /* Hover effect */
+                .order-report-link:hover {
+                    color: #ffffff;
+                    /* New color on hover */
+                }
+            </style>

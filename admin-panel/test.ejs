@@ -1,0 +1,33 @@
+  <label class="form-label">Categories</label>
+                            <select name="categories" class="form-select">
+                                <option> Select categorie </option>
+                                <% for( let i = 0; i < parentCategories.length; i++ ) { %>
+                                    <option value="<%= parentCategories[i].name %>"><%= parentCategories[i].name %></option>
+                                <% } %>
+                            </select>
+                        </div>
+                        <div class="col-sm-6 mb-3">
+                            <label class="form-label">Sub-categories</label>
+                            <select name="sub_categories" class="form-select"> </select>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label">Child-categories</label>
+                            <select name="child_categories" class="form-select"> </select>
+                        </div>
+                        <hr>
+                        <div class="mb-4">
+                            <% for( let i = 0; i < parentAttribute.length; i++ ) { %>
+                                <% if (parentAttribute[i].parent === undefined) { %>
+                                    <div class="attributeSize input-group mb-3 mt-1">
+                                        <label class="input-group-text"> <%= parentAttribute[i].name %> </label>
+                                        <select name="attribute" class="form-select">
+                                            <option value="select-attribute-value"> Select Attribute Value </option>
+                                            <% for( let j = 0; j < parentAttribute.length; j++ ) { %>
+                                                <% if (parentAttribute[i].name === parentAttribute[j].parent ) { %>
+                                                    <option value="<%= parentAttribute[j].name %>"> <%= parentAttribute[j].name %> </option> 
+                                                <% } %>
+                                            <% } %>
+                                        </select>
+                                    </div>
+                                <% } %>
+                            <% } %>

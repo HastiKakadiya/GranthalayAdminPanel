@@ -1,0 +1,400 @@
+<%- include('layouts/sidebar'); %>
+    <%- include('layouts/header'); %>
+        <style>
+            /* Default state of the date picker icon */
+            input[type="date"]::-webkit-calendar-picker-indicator {
+                filter: invert(0) sepia(0) saturate(1) hue-rotate(0deg);
+                transition: filter 0.3s ease;
+                cursor: pointer;
+            }
+
+            /* Change the icon color to blue on hover */
+            input[type="date"]:hover::-webkit-calendar-picker-indicator,
+            input[type="date"]:focus::-webkit-calendar-picker-indicator {
+                filter: invert(32%) sepia(91%) saturate(2151%) hue-rotate(201deg) brightness(100%) contrast(97%);
+            }
+        </style>
+        <section class="content-main">
+            <div class="content-header">
+                <div>
+                    <h2 class="content-title card-title">Order Report Analysis</h2>
+                </div>
+
+                <a href="/order-report?exportType=excel" class="btn btn-success">Download Excel</a>
+            </div>
+
+            <!-- Summary Statistics -->
+            <div class="card mb-4 outer-border">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="card mb-4 outer-border" style="background-color: orange;">
+                                <div class="card-body">
+                                    <h4>Total Orders in Database</h4>
+                                    <p class="lead">
+                                        <%= orders.length %>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card mb-4 bg-primary outer-border">
+                                <div class="card-body">
+                                    <h4>Total Revenue</h4>
+                                    <p class="lead">
+                                        ₹ <%= orders.reduce((sum, order)=> sum + order.totalCost, 0).toFixed(2) %>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card mb-4 bg-success outer-border">
+                                <div class="card-body">
+                                    <h4>New Orders This Year</h4>
+                                    <p class="lead">
+                                        <%= orders.filter(order=> new Date(order.createdAt).getFullYear() ===
+                                            parseInt(selectedYear)).length %>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search and Filter Form -->
+            <form action="/order-report" method="get" id="filterForm">
+                <div class="row mb-4 d-flex align-items-center">
+                    <table>
+                        <tr>
+                            <td class="col-md-3">
+                                <input type="text" name="search" class="form-control"
+                                    placeholder="Search by Order No" value="<%= search %>">
+                            </td>
+                            <td class="col-md-2">
+                                <input type="date" name="startDate" class="form-control" value="<%= startDate %>">
+                            </td>
+                            <td class="col-md-2">
+                                <input type="date" name="endDate" class="form-control" value="<%= endDate %>">
+                            </td>
+                            <td class="col-md-2">
+                                <!-- <select name="year" class="form-control">
+                                <option value="">Select Year</option>
+                                <% years.forEach(year => { %>
+                                    <option value="<%= year %>" <%= selectedYear == year ? "selected" : "" %>><%= year %></option>
+                                <% }) %>
+                            </select> -->
+
+                                <select class="form-control" id="yearFilter" name="year">
+                                    <option value="" <%=!selectedYear ? "selected" : "" %>>Select Year</option>
+                                    <% years.forEach(function(yr) { %>
+                                        <option value="<%= yr %>" <%=selectedYear==yr ? "selected" : "" %>><%= yr %>
+                                        </option>
+                                        <% }) %>
+                                </select>
+
+                            </td>
+                            <td class="col-md-2">
+                                <select name="sortBy" class="form-control">
+                                    <option value="" <%=!sortBy ? 'selected' : '' %>>Sort By</option>
+                                    <option value="desc" <%=sortBy==='desc' ? 'selected' : '' %>>Most Recent</option>
+                                    <option value="asc" <%=sortBy==='asc' ? 'selected' : '' %>>Oldest First</option>
+                                </select>
+                            </td>
+                            <td class="col-md-1">
+                                <button type="submit" class="btn btn-primary">Apply</button>
+                            </td>
+                            <td class="col-md-1">
+                                <button type="button" id="clearButton" class="btn btn-danger">Clear</button>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </form>
+
+            <!-- Chart for Monthly Order Data -->
+            <div class="card mb-4 outer-border">
+                <div class="card-body">
+                    <h4>Order Analysis by Month - <%= selectedYear %>
+                    </h4>
+                    <canvas id="monthlyChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Order Data Table -->
+            <div class="card mb-4 outer-border">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Total Order Items</th>
+                                    <th>Customer Name</th>
+                                    <th>Phone</th>
+                                    <th>Email</th>
+                                    <th>Shipping Charges</th>
+                                    <th>Pincode</th>
+                                    <th>Area</th>
+                                    <th>City</th>
+                                    <th>State</th>
+                                    <th>Total Amount</th>
+                                    <th>Payment Status</th>
+                                    <th>Payment Method</th>
+                                    <th>Order Date</th>
+                                    <th class="text-end">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="orderTable">
+                                <% if (orders.length> 0) { %>
+                                    <% orders.forEach(order=> { %>
+                                        <tr>
+                                            <td><b>
+                                                    <%= order.orderNumber %>
+                                                </b></td>
+                                            <td class="text-center">
+                                                <%= order.totalOrderItems %>
+                                            </td>
+
+                                            <% if (order.customer_id && order.customer_id.full_name) { %>
+                                                <td>
+                                                    <%= order.customer_id.full_name %>
+                                                </td>
+                                                <td>
+                                                    <%= order.customer_id.phone %>
+                                                </td>
+                                                <td>
+                                                    <%= order.customer_id.email %>
+                                                </td>
+                                                <% } else { %>
+                                                    <td>N/A</td>
+                                                    <td>N/A</td>
+                                                    <td>N/A</td>
+                                                    <% } %>
+
+                                                        <td>
+                                                            <%= order.shipping_charge %>
+                                                        </td>
+                                                        <td>
+                                                            <%= order.pincode || '-' %>
+                                                        </td>
+                                                        <td>
+                                                            <%= order.shipping_area || 'N/A' %>
+                                                        </td>
+                                                        <td>
+                                                            <%= order.shipping_city || 'N/A' %>
+                                                        </td>
+                                                        <td>
+                                                            <%= order.shipping_state || 'N/A' %>
+                                                        </td>
+                                                        <td>₹ <%= order.totalCost ? order.totalCost.toFixed(2) : '0.00'
+                                                                %>
+                                                        </td>
+
+                                                        <td>
+                                                            <span
+                                                                class="badge <%= order.payment ? 'alert-success' : 'alert-danger' %>">
+                                                                <%= order.payment ? "Paid" : "Pending" %>
+                                                            </span>
+                                                        </td>
+                                                        <td><span class="badge alert-warning">
+                                                                <%= order.type || "N/A" %>
+                                                            </span></td>
+
+                                                        <td>
+                                                            <% const createdAt=new Date(order.createdAt); %>
+                                                                <% const
+                                                                    formattedDate=`${String(createdAt.getDate()).padStart(2, '0'
+                                                                    )}/${String(createdAt.getMonth() +
+                                                                    1).padStart(2, '0' )}/${createdAt.getFullYear()}`;
+                                                                    %>
+                                                                    <%= formattedDate %>
+                                                        </td>
+
+                                                        <td class="text-end">
+                                                            <a href="/order-details/<%= order._id %>"
+                                                                class="btn btn-md rounded font-sm">Detail</a>
+                                                        </td>
+                                        </tr>
+                                        <% }) %>
+                                            <% } else { %>
+                                                <tr>
+                                                    <td colspan="9" class="text-center"><b>No orders found.</b></td>
+                                                </tr>
+                                                <% } %>
+                            </tbody>
+
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <!-- Pagination Controls -->
+            <% if (totalPages && totalPages> 1) { %>
+                <div class="pagination-container text-center mb-4">
+                    <nav>
+                        <ul class="pagination justify-content-center">
+                            <% if (currentPage> 1) { %>
+                                <li class="page-item">
+                                    <a class="page-link"
+                                        href="?<%= `page=${currentPage - 1}` %><%= search ? `&search=${search}` : '' %><%= selectedYear ? `&year=${selectedYear}` : '' %><%= startDate ? `&startDate=${startDate}` : '' %><%= endDate ? `&endDate=${endDate}` : '' %><%= sortBy ? `&sortBy=${sortBy}` : '' %>">&laquo;
+                                        Prev</a>
+                                </li>
+                                <% } %>
+
+                                    <% for (let i=1; i <=totalPages; i++) { %>
+                                        <li class="page-item <%= currentPage === i ? 'active' : '' %>">
+                                            <a class="page-link"
+                                                href="?<%= `page=${i}` %><%= search ? `&search=${search}` : '' %><%= selectedYear ? `&year=${selectedYear}` : '' %><%= startDate ? `&startDate=${startDate}` : '' %><%= endDate ? `&endDate=${endDate}` : '' %><%= sortBy ? `&sortBy=${sortBy}` : '' %>">
+                                                <%= i %>
+                                            </a>
+                                        </li>
+                                        <% } %>
+
+                                            <% if (currentPage < totalPages) { %>
+                                                <li class="page-item">
+                                                    <a class="page-link"
+                                                        href="?<%= `page=${currentPage + 1}` %><%= search ? `&search=${search}` : '' %><%= selectedYear ? `&year=${selectedYear}` : '' %><%= startDate ? `&startDate=${startDate}` : '' %><%= endDate ? `&endDate=${endDate}` : '' %><%= sortBy ? `&sortBy=${sortBy}` : '' %>">Next
+                                                        &raquo;</a>
+                                                </li>
+                                                <% } %>
+                        </ul>
+                    </nav>
+                </div>
+                <% } %>
+
+                    <% if (typeof totalRecords !=="undefined" && totalRecords> 10) { %>
+                        <div class="text-center">
+                            <a href="/order" class="btn btn-primary">More...</a>
+                        </div>
+                        <% } %>
+
+        </section>
+
+        <%- include('layouts/footer'); %>
+
+            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+            <script>
+                document.addEventListener("DOMContentLoaded", function () {
+                    const ctx = document.getElementById('monthlyChart').getContext('2d');
+                    const chartData = <%- JSON.stringify(chartData || [0]) %>;
+                    const chartLabels = <%- JSON.stringify(chartLabels || ["No Data"]) %>;
+
+                    let myChart = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: chartLabels,
+                            datasets: [{
+                                label: 'Orders Per Month',
+                                data: chartData,
+                                backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                                borderColor: 'rgba(54, 162, 235, 1)',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            scales: {
+                                y: { beginAtZero: true }
+                            }
+                        }
+                    });
+
+                    // Reload chart on filter change
+                    document.getElementById("filterForm").addEventListener("submit", function () {
+                        myChart.destroy(); // Destroy old chart before updating
+                    });
+                });
+            </script>
+
+            <script>
+                document.addEventListener("DOMContentLoaded", function () {
+                    function autoScroll() {
+                        let scrollSpeed = 40; // Increase for faster scrolling
+                        let scrollIntervalTime = 70; // Decrease for faster scrolling
+                        let scrollInterval;
+
+                        function startScrolling() {
+                            scrollInterval = setInterval(function () {
+                                if (window.innerHeight + window.scrollY >= document.body.scrollHeight) {
+                                    clearInterval(scrollInterval); // Stop scrolling when bottom is reached
+                                } else {
+                                    window.scrollBy({ top: scrollSpeed, behavior: 'smooth' });
+                                }
+                            }, scrollIntervalTime);
+                        }
+
+                        startScrolling(); // Start auto-scroll on page load
+
+                        // Stop auto-scrolling when user interacts
+                        function stopScrolling() {
+                            clearInterval(scrollInterval);
+                            window.removeEventListener("wheel", stopScrolling);
+                            window.removeEventListener("touchmove", stopScrolling);
+                        }
+
+                        window.addEventListener("wheel", stopScrolling, { once: true });
+                        window.addEventListener("touchmove", stopScrolling, { once: true });
+                    }
+
+                    autoScroll();
+                });
+
+
+                // Search filter
+                document.getElementById("searchInput")?.addEventListener("keyup", function () {
+                    const searchValue = this.value.toLowerCase();
+                    const rows = document.querySelectorAll("tbody tr");
+
+                    rows.forEach((row) => {
+                        const rowText = row.textContent.toLowerCase();
+                        row.style.display = rowText.includes(searchValue) ? "" : "none";
+                    });
+                });
+
+            </script>
+            <script>
+                document.getElementById("clearButton").addEventListener("click", function () {
+                    // Get the filter form
+                    document.getElementById("yearFilter").value = ""; // Reset year dropdown    
+                    let form = document.getElementById("filterForm");
+
+                    // Reset all form fields
+                    form.reset();
+
+                    // Remove any query parameters from the URL
+                    window.location.href = "/order-report";  // Redirect to default page without filters
+                });
+
+
+            </script>
+
+<script>
+    // Set max date as today for both start and end date
+    const today = new Date().toISOString().split("T")[0];
+    const startDateInput = document.querySelector('input[name="startDate"]');
+    const endDateInput = document.querySelector('input[name="endDate"]');
+
+    if (startDateInput) startDateInput.setAttribute("max", today);
+    if (endDateInput) endDateInput.setAttribute("max", today);
+
+    // Update end date's min when start date changes
+    startDateInput?.addEventListener("change", function () {
+        const startDate = this.value;
+        if (endDateInput) {
+            endDateInput.setAttribute("min", startDate);
+            // Auto-clear end date if it's before new start date
+            if (endDateInput.value && endDateInput.value < startDate) {
+                endDateInput.value = '';
+            }
+        }
+    });
+
+    // Optional: validate on end date change too
+    endDateInput?.addEventListener("change", function () {
+        const endDate = this.value;
+        if (startDateInput && endDate < startDateInput.value) {
+            alert("End Date cannot be before Start Date.");
+            this.value = "";
+        }
+    });
+</script>
